@@ -22,7 +22,8 @@ const Navbar = () => {
   const isActivePath = (path) => location.pathname === path;
 
   const navLinks = [
-    { path: '/', label: 'Home', icon: Heart },
+    { path: '/', label: 'Home', icon: Heart, publicOnly: true },
+    { path: '/dashboard', label: 'Dashboard', icon: User, authRequired: true },
     { path: '/favorites', label: 'Favorites', icon: Heart, authRequired: true },
     { path: '/post-pet', label: 'Post Pet', icon: PlusCircle, authRequired: true },
     ...(isAdmin ? [{ path: '/admin', label: 'Admin', icon: Settings }] : [])
@@ -34,7 +35,7 @@ const Navbar = () => {
         <div className="flex justify-between h-16">
           {/* Logo and Desktop Navigation */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
+            <Link to={isAuthenticated ? '/dashboard' : '/'} className="flex items-center space-x-2">
               <div className="relative">
                 <Heart className="h-8 w-8 text-primary-600 animate-pulse" />
                 <Heart className="h-8 w-8 text-primary-500 absolute top-0 left-0 transform scale-90 opacity-50" />
@@ -46,8 +47,9 @@ const Navbar = () => {
 
             {/* Desktop Navigation Links */}
             <div className="hidden md:flex items-center space-x-8 ml-10">
-              {navLinks.map(({ path, label, icon: Icon, authRequired }) => {
+              {navLinks.map(({ path, label, icon: Icon, authRequired, publicOnly }) => {
                 if (authRequired && !isAuthenticated) return null;
+                if (publicOnly && isAuthenticated) return null;
                 return (
                   <Link
                     key={path}
@@ -147,8 +149,9 @@ const Navbar = () => {
       {isOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
-            {navLinks.map(({ path, label, icon: Icon, authRequired }) => {
+            {navLinks.map(({ path, label, icon: Icon, authRequired, publicOnly }) => {
               if (authRequired && !isAuthenticated) return null;
+              if (publicOnly && isAuthenticated) return null;
               return (
                 <Link
                   key={path}

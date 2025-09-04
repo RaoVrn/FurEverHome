@@ -147,6 +147,16 @@ export const petAPI = {
     }
   },
 
+  // Get user's adopted pets
+  getAdoptedPets: async () => {
+    try {
+      const response = await API.get('/pets/user/adopted');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // Search for pets
   searchPets: async (queryParams) => {
     try {

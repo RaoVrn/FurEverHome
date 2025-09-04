@@ -26,7 +26,8 @@ const Login = () => {
       const result = await login(data);
       if (result.success) {
         toast.success('Welcome back!');
-        navigate('/');
+        const role = (result.user?.role || localStorage.getItem('role'));
+        navigate(role === 'admin' ? '/admin' : '/dashboard');
       } else {
         toast.error(result.message);
       }

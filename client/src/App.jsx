@@ -6,9 +6,11 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
 import Loading from './components/ui/Loading';
+import { useAuth } from './contexts/AuthContext';
 
 // Import Pages
 import Home from './pages/Home';
+import UserDashboard from './pages/UserDashboard';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import PostPet from './pages/PostPet';
@@ -18,18 +20,26 @@ import Profile from './pages/Profile';
 import EditPet from './pages/EditPet';
 import Favorites from './pages/Favorites';
 
-// Protected Route Component
-const ProtectedRoute = ({ element, adminOnly = false }) => {
+// Protected Route Component with admin redirection logic
+const ProtectedRoute = ({ element, adminOnly = false, path }) => {
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');
-
   if (!token) return <Navigate to="/login" replace />;
-  if (adminOnly && role !== 'admin') return <Navigate to="/" replace />;
-
+  if (adminOnly && role !== 'admin') return <Navigate to="/dashboard" replace />;
+  // If user is admin and tries to access generic user dashboard, send to admin
+  if (!adminOnly && role === 'admin' && path === '/dashboard') {
+    return <Navigate to="/admin" replace />;
+  }
   return element;
 };
 
 const App = () => {
+  const HomeRedirectWrapper = () => {
+    // Using localStorage directly to avoid context loading lag flashing
+    const token = localStorage.getItem('token');
+    if (token) return <Navigate to="/dashboard" replace />;
+    return <Home />;
+  };
   return (
     <ErrorBoundary>
       <ThemeProvider>
@@ -39,7 +49,12 @@ const App = () => {
               <Navbar />
               <main className="pb-8">
                 <Routes>
-                  <Route path="/" element={<Home />} />
+                  {/* Public home redirects authenticated users to dashboard */}
+                  <Route path="/" element={<HomeRedirectWrapper />} />
+                  <Route 
+                    path="/dashboard" 
+                    element={<ProtectedRoute path="/dashboard" element={<UserDashboard />} />} 
+                  />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/pets/:id" element={<PetDetails />} />
@@ -61,7 +76,7 @@ const App = () => {
                   />
                   <Route 
                     path="/admin" 
-                    element={<ProtectedRoute adminOnly={true} element={<AdminDashboard />} />} 
+                    element={<ProtectedRoute path="/admin" adminOnly={true} element={<AdminDashboard />} />} 
                   />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
