@@ -97,8 +97,8 @@ const UserDashboard = () => {
               )}
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <Button as={Link} to="/post-pet" size="sm" icon={<PlusCircle size={16}/>}>Post a Pet</Button>
-              <Button as={Link} to="/favorites" variant="secondary" size="sm" icon={<Heart size={16}/>}>Favorites</Button>
+              <Button to="/post-pet" size="sm" icon={<PlusCircle size={16}/>}>Post a Pet</Button>
+              <Button to="/favorites" variant="secondary" size="sm" icon={<Heart size={16}/>}>Favorites</Button>
               <Button variant="outline" size="sm" onClick={loadCore} icon={<RefreshCcw size={16}/>}>Refresh</Button>
             </div>
           </div>
@@ -126,11 +126,11 @@ const UserDashboard = () => {
             )}
 
             {/* Favorites */}
-            <Section title="Your Favorites" icon={Heart} action={<Button size="sm" variant="ghost" as={Link} to="/favorites" icon={<ArrowRight size={14}/>}>View All</Button>}>
+            <Section title="Your Favorites" icon={Heart} action={<Button size="sm" variant="ghost" to="/favorites" icon={<ArrowRight size={14}/>}>View All</Button>}>
               {favorites.length === 0 ? (
                 <Card className="p-8 text-center">
                   <p className="text-sm text-gray-600 dark:text-gray-400">You haven't added any favorites yet. Browse pets and tap the heart to save them.</p>
-                  <div className="mt-4"><Button as={Link} to="/" size="sm">Browse Pets</Button></div>
+                  <div className="mt-4"><Button to="/" size="sm">Browse Pets</Button></div>
                 </Card>
               ) : (
                 <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
@@ -140,11 +140,11 @@ const UserDashboard = () => {
             </Section>
 
             {/* My Listings */}
-            <Section title="My Listings" icon={PawPrint} action={<Button size="sm" variant="ghost" as={Link} to="/post-pet" icon={<PlusCircle size={14}/>}>Add New</Button>}>
+            <Section title="My Listings" icon={PawPrint} action={<Button size="sm" variant="ghost" to="/post-pet" icon={<PlusCircle size={14}/>}>Add New</Button>}>
               {posted.length === 0 ? (
                 <Card className="p-8 text-center">
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">You haven't posted any pets yet.</p>
-                  <Button as={Link} to="/post-pet" size="sm" icon={<PlusCircle size={14}/>}>Post Your First Pet</Button>
+                  <Button to="/post-pet" size="sm" icon={<PlusCircle size={14}/>}>Post Your First Pet</Button>
                 </Card>
               ) : (
                 <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
@@ -158,7 +158,7 @@ const UserDashboard = () => {
               {adopted.length === 0 ? (
                 <Card className="p-8 text-center">
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">You haven't adopted any pets yet.</p>
-                  <Button as={Link} to="/" size="sm">Find a Pet</Button>
+                  <Button to="/" size="sm">Find a Pet</Button>
                 </Card>
               ) : (
                 <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
@@ -214,8 +214,8 @@ const UserDashboard = () => {
                   <p className="text-white/90 text-sm md:text-base max-w-2xl leading-relaxed">Post a new listing or keep exploring recommendations. Every interaction improves the matching intelligence.</p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Button as={Link} to="/post-pet" size="lg" variant="secondary" icon={<PlusCircle size={18}/>}>Post a Pet</Button>
-                  <Button as={Link} to="/" size="lg" className="bg-white text-primary-600 hover:bg-white/90" icon={<PawPrint size={18}/>}>Browse More</Button>
+                  <Button to="/post-pet" size="lg" variant="secondary" icon={<PlusCircle size={18}/>}>Post a Pet</Button>
+                  <Button to="/" size="lg" className="bg-white text-primary-600 hover:bg-white/90" icon={<PawPrint size={18}/>}>Browse More</Button>
                 </div>
                 <div className="absolute -right-10 -bottom-10 w-72 h-72 bg-white/20 rounded-full blur-2xl pointer-events-none" />
               </div>

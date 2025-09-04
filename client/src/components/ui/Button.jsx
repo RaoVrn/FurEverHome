@@ -1,15 +1,20 @@
 import React from 'react';
 import { clsx } from 'clsx';
+import { Link, useNavigate } from 'react-router-dom';
 
-const Button = ({ 
-  children, 
-  variant = 'primary', 
-  size = 'md', 
-  loading = false, 
-  disabled = false, 
-  className = '', 
+const Button = ({
+  children,
+  variant = 'primary',
+  size = 'md',
+  loading = false,
+  disabled = false,
+  className = '',
   icon,
-  ...props 
+  as: Component,
+  to,
+  href,
+  onClick,
+  ...rest
 }) => {
   const baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
   
@@ -35,13 +40,11 @@ const Button = ({
     sizes[size],
     className
   );
-  
-  return (
-    <button 
-      className={classes} 
-      disabled={disabled || loading}
-      {...props}
-    >
+  const isDisabled = disabled || loading;
+  const navigate = useNavigate();
+
+  const content = (
+    <>
       {loading && (
         <svg className="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -50,6 +53,66 @@ const Button = ({
       )}
       {icon && !loading && <span className="mr-2">{icon}</span>}
       {children}
+    </>
+  );
+
+  // Prefer explicit component
+  if (Component) {
+    const Comp = Component;
+    return (
+      <Comp
+        className={clsx(classes, isDisabled && 'pointer-events-none')}
+        to={to}
+        href={href || to}
+        onClick={isDisabled ? undefined : onClick}
+        {...rest}
+      >
+        {content}
+      </Comp>
+    );
+  }
+
+  // If 'to' provided, use Link
+  if (to) {
+    return (
+      <Link
+        className={clsx(classes, isDisabled && 'pointer-events-none opacity-50')}
+        to={to}
+        onClick={isDisabled ? (e)=>e.preventDefault() : onClick}
+        {...rest}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  // If href provided, use anchor
+  if (href) {
+    return (
+      <a
+        className={clsx(classes, isDisabled && 'pointer-events-none opacity-50')}
+        href={href}
+        onClick={isDisabled ? (e)=>e.preventDefault() : onClick}
+        {...rest}
+      >
+        {content}
+      </a>
+    );
+  }
+
+  // Fallback button (optional navigation on 'to')
+  return (
+    <button
+      className={classes}
+      disabled={isDisabled}
+      onClick={(e)=>{
+        if (isDisabled) { e.preventDefault(); return; }
+        if (onClick) onClick(e);
+        if (to) navigate(to);
+      }}
+      {...rest}
+    >
+      {content}
     </button>
   );
 };

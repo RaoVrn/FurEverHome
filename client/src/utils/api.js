@@ -208,6 +208,18 @@ export const authAPI = {
     } catch (error) {
       throw error;
     }
+  },
+  changePassword: async (payload) => {
+    try {
+      const response = await API.post('/auth/change-password', payload);
+      return response.data;
+    } catch (error) { throw error; }
+  },
+  deleteAccount: async () => {
+    try {
+      const response = await API.delete('/auth/account');
+      return response.data;
+    } catch (error) { throw error; }
   }
 };
 
