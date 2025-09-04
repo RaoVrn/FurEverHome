@@ -1,0 +1,75 @@
+# === Node.js ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+.pnpm-debug.log*
+
+# === Environment Variables ===
+.env
+.env.local
+.env.*.local
+
+# === Logs ===
+logs
+*.log
+logs/*.log
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# === Build Output ===
+dist/
+build/
+.cache/
+.next/
+out/
+.tmp/
+
+# === Coverage ===
+coverage/
+*.lcov
+
+# === Editor Directories and Files ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.bak
+*.tmp
+*.DS_Store
+Thumbs.db
+
+# === OS Specific ===
+.DS_Store
+ehthumbs.db
+Icon?
+Thumbs.db
+
+# === Uploads (if not storing user uploads in repo) ===
+uploads/
+
+# === React Specific ===
+client/.env
+client/node_modules/
+client/build/
+client/.pnp
+client/.pnp.js
+
+# === Backend Specific ===
+backend/.env
+backend/node_modules/
+
+# === Testing ===
+/jest-cache/
+/jest-test-results.json
+
+# === Misc ===
+*.tgz
+*.zip
+*.tar.gz
+*.rar
