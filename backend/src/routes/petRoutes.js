@@ -27,6 +27,11 @@ router.post('/:petId/report', authMiddleware, reportPet);
 // Get pet statistics
 router.get('/stats', getPetStats);
 
+// Get trending pets
+router.get('/trending', require('../controllers/petFeatures').getTrendingPets);
+// Adoption & engagement insights
+router.get('/insights', require('../controllers/petFeatures').getAdoptionInsights);
+
 const Pet = require('../models/Pet');
 
 // Get user's posted pets

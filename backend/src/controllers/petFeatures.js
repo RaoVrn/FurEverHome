@@ -164,5 +164,99 @@ module.exports = {
   getNearbyPets,
   getRecommendedPets,
   reportPet,
-  getPetStats
+  getPetStats,
+  /**
+   * Get trending pets based on views & likes (no hardcoded data)
+   * Combines views and likes count for ordering.
+   */
+  getTrendingPets: async (req, res, next) => {
+    try {
+      const limit = parseInt(req.query.limit) || 8;
+      const pipeline = [
+        { $match: { status: 'available' } },
+        { $addFields: { likesCount: { $size: { $ifNull: ['$likes', []] } } } },
+        // Weighted score: views * 1 + likes * 3 (adjustable)
+        { $addFields: { popularityScore: { $add: [ '$views', { $multiply: ['$likesCount', 3] } ] } } },
+        { $sort: { popularityScore: -1, createdAt: -1 } },
+        { $limit: limit },
+        { $project: { name: 1, breed: 1, category: 1, age: 1, gender: 1, photos: 1, image: 1, urgency: 1, vaccinated: 1, views: 1, likesCount: 1, createdAt: 1, postedBy: 1, adoptionFee: 1, size: 1 } }
+      ];
+
+      const results = await Pet.aggregate(pipeline);
+
+      // Populate postedBy manually (since populate doesn't work after aggregation without $lookup)
+      const postedByIds = [...new Set(results.map(r => r.postedBy.toString()))];
+      const users = await User.find({ _id: { $in: postedByIds } }).select('name email location phone');
+      const userMap = users.reduce((acc,u)=>{acc[u._id]=u; return acc;},{});
+
+      const pets = results.map(r => ({
+        ...r,
+        postedBy: userMap[r.postedBy] || null,
+        likeCount: r.likesCount
+      }));
+
+      res.json(pets);
+    } catch (err) {
+      next(err);
+    }
+  },
+  /**
+   * Adoption & engagement insights (all real data, aggregated at request time)
+   */
+  getAdoptionInsights: async (req, res, next) => {
+    try {
+      // Recent adoptions
+      const recentAdoptions = await Pet.find({ status: 'adopted' })
+        .select('name breed category adoptedAt createdAt adoptionFee photos image postedBy adoptedBy')
+        .populate('postedBy', 'name')
+        .populate('adoptedBy', 'name')
+        .sort({ adoptedAt: -1 })
+        .limit(6)
+        .lean();
+
+      // Aggregate adoption durations
+      const adoptionDurations = await Pet.aggregate([
+        { $match: { adoptedAt: { $ne: null } } },
+        { $project: { adoptionDuration: { $subtract: ['$adoptedAt', '$createdAt'] }, breed: 1 } },
+        { $group: { _id: null, avgDuration: { $avg: '$adoptionDuration' }, count: { $sum: 1 } } }
+      ]);
+
+      const fastestAdoption = await Pet.aggregate([
+        { $match: { adoptedAt: { $ne: null } } },
+        { $project: { name: 1, breed: 1, adoptionDuration: { $subtract: ['$adoptedAt', '$createdAt'] }, photos: 1, image: 1 } },
+        { $sort: { adoptionDuration: 1 } },
+        { $limit: 1 }
+      ]);
+
+      // Top breeds by availability (encourages adoption of popular breeds)
+      const topBreeds = await Pet.aggregate([
+        { $match: { status: { $in: ['available','adopted'] } } },
+        { $group: { _id: '$breed', count: { $sum: 1 }, adopted: { $sum: { $cond: [{ $eq: ['$status','adopted'] }, 1, 0] } } } },
+        { $sort: { count: -1 } },
+        { $limit: 6 }
+      ]);
+
+      // Engagement metrics
+      const engagementAgg = await Pet.aggregate([
+        { $project: { views: 1, likesCount: { $size: { $ifNull: ['$likes', []] } }, status: 1 } },
+        { $group: { _id: null, totalViews: { $sum: '$views' }, totalLikes: { $sum: '$likesCount' }, totalPets: { $sum: 1 }, adopted: { $sum: { $cond: [{ $eq: ['$status','adopted'] }, 1, 0] } } } }
+      ]);
+
+      const engagement = engagementAgg[0] || { totalViews: 0, totalLikes: 0, totalPets: 0, adopted: 0 };
+
+      res.json({
+        recentAdoptions: recentAdoptions.map(p => ({
+          ...p,
+          primaryImage: p.image || (p.photos && p.photos[0]) || null
+        })),
+        averageAdoptionDuration: adoptionDurations[0]?.avgDuration || null,
+        adoptedCount: adoptionDurations[0]?.count || 0,
+        fastestAdoption: fastestAdoption[0] || null,
+        topBreeds,
+        engagement
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
 };

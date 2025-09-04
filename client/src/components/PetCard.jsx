@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Heart, MapPin, Calendar, User, Eye, Edit, Trash2 } from 'lucide-react';
 import Card from './ui/Card';
@@ -100,22 +100,36 @@ const PetCard = ({ pet, onAdopt, onLike, showOwnerActions = false, showAdoptButt
     }
   };
 
+  // Normalize image source
+  const placeholder = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xNzUgMTI1QzE3NSAxMzguODA3IDE2My44MDcgMTUwIDE1MCAxNTBDMTM2LjE5MyAxNTAgMTI1IDEzOC44MDcgMTI1IDEyNUMxMjUgMTExLjE5MyAxMzYuMTkzIDEwMCAxNTAgMTAwQzE2My44MDcgMTAwIDE3NSAxMTEuMTkzIDE3NSAxMjVaIiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik0yNzUgMTI1QzI3NSAxMzguODA3IDI2My44MDcgMTUwIDI1MCAxNTBDMjM2LjE5MyAxNTAgMjI1IDEzOC44MDcgMjI1IDEyNUMyMjUgMTExLjE5MyAyMzYuMTkzIDEwMCAyNTAgMTAwQzI2My44MDcgMTAwIDI3NSAxMTEuMTkzIDI3NSAxMjVaIiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik0yMDAgMjAwQzIxNi41NjkgMjAwIDIzMCAxODYuNTY5IDIzMCAxNzBDMjMwIDE1My40MzEgMjE2LjU2OSAxNDAgMjAwIDE0MEMxODMuNDMxIDE0MCAxNzAgMTUzLjQzMSAxNzAgMTcwQzE3MCAxODYuNTY5IDE4My40MzEgMjAwIDIwMCAyMDBaIiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik0xMjAgMjAwSDI4MFYyMDBDMjgwIDIxMS4wNDYgMjcxLjA0NiAyMjAgMjYwIDIyMEgxNDBDMTI4Ljk1NCAyMjAgMTIwIDIxMS4wNDYgMTIwIDIwMFYyMDBaIiBmaWxsPSIjOUNBM0FGIi8+CjwvZXN2Zz4K';
+  const buildImageUrl = (src) => {
+    if (!src) return placeholder;
+    if (src.startsWith('http') || src.startsWith('data:')) return src;
+    const base = process.env.REACT_APP_API_BASE || 'http://localhost:5000';
+    return `${base.replace(/\/$/,'')}/${src.replace(/^\//,'')}`;
+  };
+  const primaryImage = useMemo(() => {
+    if (pet.primaryImage) return buildImageUrl(pet.primaryImage);
+    if (pet.photos?.length) return buildImageUrl(pet.photos[0]);
+    if (pet.image) return buildImageUrl(pet.image);
+    if (pet.images?.length) return buildImageUrl(pet.images[0]);
+    return placeholder;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pet.primaryImage, pet.photos, pet.image, pet.images]);
+
   return (
     <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
       <Link to={`/pets/${pet._id}`} className="block">
         <div className="relative">
-          <img
-            src={
-              (pet.photos && pet.photos.length > 0) 
-                ? pet.photos[0]
-                : pet.image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xNzUgMTI1QzE3NSAxMzguODA3IDE2My44MDcgMTUwIDE1MCAxNTBDMTM2LjE5MyAxNTAgMTI1IDEzOC44MDcgMTI1IDEyNUMxMjUgMTExLjE5MyAxMzYuMTkzIDEwMCAxNTAgMTAwQzE2My44MDcgMTAwIDE3NSAxMTEuMTkzIDE3NSAxMjVaIiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik0yNzUgMTI1QzI3NSAxMzguODA3IDI2My44MDcgMTUwIDI1MCAxNTBDMjM2LjE5MyAxNTAgMjI1IDEzOC44MDcgMjI1IDEyNUMyMjUgMTExLjE5MyAyMzYuMTkzIDEwMCAyNTAgMTAwQzI2My44MDcgMTAwIDI3NSAxMTEuMTkzIDI3NSAxMjVaIiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik0yMDAgMjAwQzIxNi41NjkgMjAwIDIzMCAxODYuNTY5IDIzMCAxNzBDMjMwIDE1My40MzEgMjE2LjU2OSAxNDAgMjAwIDE0MEMxODMuNDMxIDE0MCAxNzAgMTUzLjQzMSAxNzAgMTcwQzE3MCAxODYuNTY5IDE4My40MzEgMjAwIDIwMCAyMDBaIiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik0xMjAgMjAwSDI4MFYyMDBDMjgwIDIxMS4wNDYgMjcxLjA0NiAyMjAgMjYwIDIyMEgxNDBDMTI4Ljk1NCAyMjAgMTIwIDIxMS4wNDYgMTIwIDIwMFYyMDBaIiBmaWxsPSIjOUNBM0FGIi8+CjwvZXN2Zz4K'
-            }
-            alt={pet.name}
-            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-            onError={(e) => {
-              e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xNzUgMTI1QzE3NSAxMzguODA3IDE2My44MDcgMTUwIDE1MCAxNTBDMTM2LjE5MyAxNTAgMTI1IDEzOC44MDcgMTI1IDEyNUMxMjUgMTExLjE5MyAxMzYuMTkzIDEwMCAxNTAgMTAwQzE2My44MDcgMTAwIDE3NSAxMTEuMTkzIDE3NSAxMjVaIiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik0yNzUgMTI1QzI3NSAxMzguODA3IDI2My44MDcgMTUwIDI1MCAxNTBDMjM2LjE5MyAxNTAgMjI1IDEzOC44MDcgMjI1IDEyNUMyMjUgMTExLjE5MyAyMzYuMTkzIDEwMCAyNTAgMTAwQzI2My44MDcgMTAwIDI3NSAxMTEuMTkzIDI3NSAxMjVaIiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik0yMDAgMjAwQzIxNi41NjkgMjAwIDIzMCAxODYuNTY5IDIzMCAxNzBDMjMwIDE1My40MzEgMjE2LjU2OSAxNDAgMjAwIDE0MEMxODMuNDMxIDE0MCAxNzAgMTUzLjQzMSAxNzAgMTcwQzE3MCAxODYuNTY5IDE4My40MzEgMjAwIDIwMCAyMDBaIiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik0xMjAgMjAwSDI4MFYyMDBDMjgwIDIxMS4wNDYgMjcxLjA0NiAyMjAgMjYwIDIyMEgxNDBDMTI4Ljk1NCAyMjAgMTIwIDIxMS4wNDYgMTIwIDIwMFYyMDBaIiBmaWxsPSIjOUNBM0FGIi8+PC9zdmc+';
-            }}
-          />
+          <div className="w-full h-48 bg-gray-100 dark:bg-gray-700 overflow-hidden">
+            <img
+              src={primaryImage}
+              alt={`${pet.name} the ${pet.breed}`}
+              loading="lazy"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              onError={(e) => { e.currentTarget.src = placeholder; }}
+            />
+          </div>
           
           {/* Overlay badges */}
           <div className="absolute top-2 left-2 flex flex-col space-y-2">
