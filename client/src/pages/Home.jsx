@@ -255,6 +255,22 @@ const Home = () => {
 
   const activeFiltersCount = Object.values(filters).filter(value => value && value.trim() !== '').length;
 
+  // Get unique pets for main grid (excluding those in featured sections)
+  const uniqueMainPets = useMemo(() => {
+    // If no featured sections have content, show all pets
+    const hasFeaturedContent = (trending?.length > 0) || (recommended?.length > 0);
+    if (!hasFeaturedContent) {
+      return filteredPets;
+    }
+    
+    const featuredIds = new Set([
+      ...(trending?.map(p => p._id) || []),
+      ...(recommended?.map(p => p._id) || []),
+      ...(nearby?.map(p => p._id) || [])
+    ]);
+    return filteredPets.filter(pet => !featuredIds.has(pet._id));
+  }, [filteredPets, trending, recommended, nearby]);
+
   // Extra data loaders (real data, no hardcoding)
   const wrapLoader = async (key, fn) => {
     try { setLoadingExtra(prev => ({ ...prev, [key]: true })); await fn(); } finally { setLoadingExtra(prev => ({ ...prev, [key]: false })); }
@@ -264,10 +280,18 @@ const Home = () => {
     try { const res = await API.get('/pets/stats'); setStats(res.data); } catch (e) { console.warn('Stats load failed', e); }
   });
   const loadTrending = () => wrapLoader('trending', async () => {
-    try { const res = await API.get('/pets/trending?limit=8'); setTrending(res.data); } catch (e) { console.warn('Trending load failed', e); }
+    try { 
+      const res = await API.get('/pets/trending?limit=12'); 
+      setTrending(res.data); 
+    } catch (e) { console.warn('Trending load failed', e); }
   });
   const loadRecommended = () => wrapLoader('recommended', async () => {
-    try { const token = localStorage.getItem('token'); if (!token) return; const res = await API.get('/pets/recommended'); setRecommended(res.data); } catch (e) { console.warn('Recommended load failed', e); }
+    try { 
+      const token = localStorage.getItem('token'); 
+      if (!token) return; 
+      const res = await API.get('/pets/recommended?limit=12'); 
+      setRecommended(res.data); 
+    } catch (e) { console.warn('Recommended load failed', e); }
   });
   const detectLocation = () => {
     if (!navigator.geolocation) { setGeoError('Geolocation not supported'); return; }
@@ -325,6 +349,8 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900">
+      {/* Top anchor for smooth scroll */}
+      <div id="top" className="h-0 w-0 overflow-hidden" />
       {/* HERO / PRODUCT POSITIONING */}
       <div className="relative overflow-hidden">
   <div className="absolute inset-0 bg-gradient-to-br from-primary-700 via-primary-600 to-secondary-600" />
@@ -612,7 +638,7 @@ const Home = () => {
 
         {/* CATEGORY DISTRIBUTION TAGS */}
         {stats?.categoryDistribution?.length > 0 && (
-          <div className="mb-12 -mt-4">
+          <div className="mb-8 -mt-4">
             <h4 className="text-sm font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 flex items-center"><Info size={14} className="mr-2"/>Category Distribution</h4>
             <div className="flex flex-wrap gap-3">
               {stats.categoryDistribution.map(c => (
@@ -624,141 +650,195 @@ const Home = () => {
           </div>
         )}
 
-        {/* Trending Section */}
-  <div className="mb-10">
-          <SectionHeader title="Trending Now" icon={Flame} action={<Button variant="ghost" size="sm" onClick={loadTrending} loading={loadingExtra.trending}>Refresh</Button>} />
-          {trending?.length > 0 ? (
-            <div className="overflow-x-auto hide-scrollbar -mx-4 px-4">
-              <div className="flex space-x-5 snap-x snap-mandatory pb-4">
-                {trending.map(p => (
-                  <div key={p._id} className="snap-start w-72 flex-shrink-0">
-                    <PetCard pet={p} showAdoptButton />
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <SkeletonCard /> <SkeletonCard /> <SkeletonCard /> <SkeletonCard />
-            </div>
-          )}
-        </div>
-
-        {/* Recommended Section (only if logged in) */}
-        {recommended?.length > 0 && (
-          <div className="mb-10">
-            <SectionHeader title="Recommended For You" icon={Star} action={<Button variant="ghost" size="sm" onClick={loadRecommended} loading={loadingExtra.recommended}>Refresh</Button>} />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {recommended.map(p => <PetCard key={p._id} pet={p} showAdoptButton />)}
-            </div>
-          </div>
-        )}
-
-  {/* Adoption Success & Insights */}
-        {insights && (
-          <div className="mb-12">
-            <SectionHeader title="Adoption Success Stories" icon={Trophy} action={<Button variant="ghost" size="sm" onClick={loadInsights} loading={loadingInsights}>Refresh</Button>} />
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-              {/* Recent adoptions (responsive tighter layout) */}
-              <div className="lg:col-span-2">
-                <div className={`grid gap-5 ${insights.recentAdoptions?.length < 3 ? 'sm:grid-cols-2 md:grid-cols-3 max-w-2xl' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
-                  {insights.recentAdoptions?.map(p => (
-                    <div key={p._id} className="group border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-all">
-                      <div className="relative h-36 overflow-hidden">
-                        <img src={p.primaryImage} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                        <div className="absolute bottom-2 left-2 text-white drop-shadow">
-                          <p className="text-sm font-semibold">{p.name}</p>
-                          <p className="text-xs opacity-80">{p.breed}</p>
-                        </div>
-                      </div>
-                      <div className="p-3 text-[11px] text-gray-600 dark:text-gray-400 flex items-center justify-between">
-                        <span>{new Date(p.adoptedAt).toLocaleDateString()}</span>
-                        <span className="text-primary-600 dark:text-primary-400 font-medium">Happy Home ❤</span>
-                      </div>
+        {/* Featured Sections - Optimized Layout */}
+        <div className="space-y-8 mb-8">
+          
+          {/* Trending Section */}
+          {trending?.length > 0 && (
+            <div>
+              <SectionHeader title="Trending Now" icon={Flame} action={<Button variant="ghost" size="sm" onClick={loadTrending} loading={loadingExtra.trending}>Refresh</Button>} />
+              <div className="overflow-x-auto hide-scrollbar -mx-4 px-4">
+                <div className="flex space-x-5 snap-x snap-mandatory pb-4">
+                  {trending.slice(0, 6).map(p => (
+                    <div key={p._id} className="snap-start w-72 flex-shrink-0">
+                      <PetCard pet={p} showAdoptButton />
                     </div>
                   ))}
                 </div>
               </div>
-              {/* Metrics */}
-              <div className="space-y-4">
-                <div className="rounded-xl p-5 bg-gradient-to-br from-primary-600 to-secondary-600 text-white shadow-lg">
-                  <h4 className="text-lg font-semibold mb-3 flex items-center space-x-2"><PawPrint size={18} /><span>Why Adopt Today?</span></h4>
-                  <ul className="text-sm space-y-2 opacity-95 list-disc list-inside">
-                    <li>Give a second chance to a loving companion</li>
-                    <li>Each adoption frees space for another rescue</li>
-                    <li>Lower cost than buying from breeders</li>
-                    <li>Many pets already vaccinated & vet-checked</li>
-                  </ul>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                    <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 mb-1"><Clock size={14}/> <span>Avg Adoption Time</span></div>
-                    <p className="text-lg font-semibold text-gray-900 dark:text-white">{insights.averageAdoptionDuration ? `${Math.round(insights.averageAdoptionDuration / (1000*60*60*24))}d` : '—'}</p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                    <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 mb-1"><Flame size={14}/> <span>Total Adoptions</span></div>
-                    <p className="text-lg font-semibold text-gray-900 dark:text-white">{insights.adoptedCount}</p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 col-span-2">
-                    <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 mb-1"><Star size={14}/> <span>Popular Breeds</span></div>
-                    <div className="flex flex-wrap gap-2">
-                      {insights.topBreeds?.map(b => (
-                        <span key={b._id} className="px-2 py-1 rounded-full text-xs bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-800">{b._id} <span className="font-semibold">{b.count}</span></span>
-                      ))}
-                    </div>
-                  </div>
-                  {insights.fastestAdoption && (
-                    <div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 col-span-2">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400"><Trophy size={14}/> <span>Fastest Adoption</span></div>
-                        <span className="text-xs text-gray-400">{Math.round(insights.fastestAdoption.adoptionDuration/(1000*60*60*24))}d</span>
+            </div>
+          )}
+
+          {/* Recommended Section (only if logged in and different from trending) */}
+          {recommended?.length > 0 && recommended.some(r => !trending?.find(t => t._id === r._id)) && (
+            <div>
+              <SectionHeader title="Recommended For You" icon={Star} action={<Button variant="ghost" size="sm" onClick={loadRecommended} loading={loadingExtra.recommended}>Refresh</Button>} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {recommended.filter(r => !trending?.find(t => t._id === r._id)).slice(0, 6).map(p => <PetCard key={p._id} pet={p} showAdoptButton />)}
+              </div>
+            </div>
+          )}
+
+          {/* Adoption Success & Insights - Compact Version */}
+          {insights && insights.recentAdoptions?.length > 0 && (
+            <div>
+              <SectionHeader title="Recent Success Stories" icon={Trophy} action={<Button variant="ghost" size="sm" onClick={loadInsights} loading={loadingInsights}>Refresh</Button>} />
+              <div className="grid gap-6 lg:grid-cols-4">
+                {/* Success Stories - Compact Grid */}
+                <div className="lg:col-span-3">
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    {insights.recentAdoptions.slice(0, 4).map(p => (
+                      <div key={p._id} className="group border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-all">
+                        <div className="relative h-32 overflow-hidden">
+                          <img src={p.primaryImage} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                          <div className="absolute bottom-2 left-2 text-white drop-shadow">
+                            <p className="text-sm font-semibold">{p.name}</p>
+                            <p className="text-xs opacity-80">Adopted!</p>
+                          </div>
+                        </div>
+                        <div className="p-2 text-xs text-gray-600 dark:text-gray-400 text-center">
+                          <span className="text-green-600 dark:text-green-400 font-medium">Happy Home ❤</span>
+                        </div>
                       </div>
-                      <p className="text-sm text-gray-700 dark:text-gray-300">"{insights.fastestAdoption.name}" found a home quickly—your future friend could be next!</p>
-                    </div>
-                  )}
+                    ))}
+                  </div>
                 </div>
-                <div className="text-center">
-                  <Button onClick={()=> window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })} className="w-full">Browse More Pets</Button>
+                
+                {/* Compact Metrics */}
+                <div className="space-y-3">
+                  <div className="p-4 rounded-xl bg-gradient-to-br from-primary-600 to-secondary-600 text-white shadow">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <PawPrint size={16} />
+                      <span className="text-sm font-semibold">Why Adopt?</span>
+                    </div>
+                    <ul className="text-xs space-y-1 opacity-95">
+                      <li>• Second chance for loving companion</li>
+                      <li>• Lower cost than breeders</li>
+                      <li>• Often vaccinated & vet-checked</li>
+                    </ul>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 gap-2">
+                    <div className="p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400 mb-1">
+                        <Clock size={12}/> <span>Avg Adoption</span>
+                      </div>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                        {insights.averageAdoptionDuration ? `${Math.round(insights.averageAdoptionDuration / (1000*60*60*24))}d` : '—'}
+                      </p>
+                    </div>
+                    
+                    <div className="p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400 mb-1">
+                        <Trophy size={12}/> <span>Total Success</span>
+                      </div>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white">{insights.adoptedCount}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
-  {/* Nearby Section */}
-        {nearby?.length > 0 && (
-          <div className="mb-12">
-            <SectionHeader title="Nearby Pets" icon={Compass} action={<Button variant="ghost" size="sm" onClick={detectLocation} loading={loadingExtra.nearby}>Refresh</Button>} />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {nearby.map(p => <PetCard key={p._id} pet={p} showAdoptButton />)}
+        <div id="pets" className="-mt-4 mb-4" />
+        
+        {/* Browse by Category - Quick Access */}
+        {stats?.categoryDistribution?.length > 1 && (
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+              <Filter size={18} className="mr-2" />
+              Browse by Category
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+              {stats.categoryDistribution.map(category => (
+                <button
+                  key={category._id}
+                  onClick={() => {
+                    handleFilterChange('category', category._id);
+                    fetchPets(1);
+                  }}
+                  className="group relative overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 hover:shadow-lg transition-all duration-200 hover:scale-105"
+                >
+                  <div className="text-center">
+                    <div className="text-2xl mb-2">
+                      {category._id === 'dog' ? '🐕' : 
+                       category._id === 'cat' ? '🐱' : 
+                       category._id === 'bird' ? '🐦' : 
+                       category._id === 'rabbit' ? '🐰' : '🐾'}
+                    </div>
+                    <h4 className="font-medium text-gray-900 dark:text-white capitalize text-sm">
+                      {category._id}s
+                    </h4>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {category.count} available
+                    </p>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary-500/0 to-secondary-500/0 group-hover:from-primary-500/10 group-hover:to-secondary-500/10 transition-all" />
+                </button>
+              ))}
             </div>
           </div>
         )}
 
-  <div id="pets" className="-mt-4 mb-4" />
-  {/* Pet Grid */}
-        {loading ? (
+        {/* Pet Grid */}
+        <div className="mb-8">
+          {(trending?.length > 0 || recommended?.length > 0) && uniqueMainPets.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
+                <PawPrint size={18} className="mr-2" />
+                More Pets to Discover
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Additional pets that might be perfect for you
+              </p>
+            </div>
+          )}
+          
+          {loading ? (
           <div className="flex justify-center py-12">
             <Loading size="lg" text="Loading adorable pets..." />
           </div>
-        ) : filteredPets.length === 0 ? (
-          <Card className="text-center py-12">
-            <div className="text-6xl mb-4">🐾</div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              No pets found
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Try adjusting your search criteria or filters
-            </p>
-            <Button variant="outline" onClick={clearFilters}>
-              Clear all filters
-            </Button>
-          </Card>
+        ) : uniqueMainPets.length === 0 ? (
+          <div className="py-10">
+            <div className="relative max-w-3xl mx-auto overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/70 dark:bg-gray-800/60 backdrop-blur-md p-8">
+              <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_70%_30%,rgba(99,102,241,0.15),transparent_65%)] dark:bg-[radial-gradient(circle_at_70%_30%,rgba(99,102,241,0.25),transparent_65%)]" />
+              <div className="relative text-center">
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 text-white shadow-lg">
+                  <Sparkles size={28} />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">You're All Caught Up</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 max-w-xl mx-auto leading-relaxed mb-6">
+                  Every available pet is already highlighted in the featured sections above. Try adjusting or clearing filters, or explore by category to widen your search.
+                </p>
+                <div className="flex flex-wrap justify-center gap-3 mb-6">
+                  <Button variant="outline" size="sm" onClick={clearFilters} icon={<RefreshCcw size={14}/>}>Reset Filters</Button>
+                  <Button variant="outline" size="sm" onClick={()=>window.scrollTo({top:0, behavior:'smooth'})} icon={<ArrowUpRight size={14}/>}>Back to Top</Button>
+                </div>
+                {stats?.categoryDistribution?.length > 1 && (
+                  <div className="mt-2">
+                    <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 font-medium">Quick Categories</p>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {stats.categoryDistribution.slice(0,8).map(cat => (
+                        <button
+                          key={cat._id+':empty'}
+                          onClick={() => { handleFilterChange('category', cat._id); fetchPets(1); window.scrollTo({top:0, behavior:'smooth'}); }}
+                          className="px-3 py-1.5 text-xs rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition"
+                        >
+                          {cat._id} <span className="text-primary-600 dark:text-primary-400 font-semibold ml-1">{cat.count}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {Array.isArray(filteredPets) && filteredPets.map((pet) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {Array.isArray(uniqueMainPets) && uniqueMainPets.map((pet) => (
                 <PetCard
                   key={pet._id}
                   pet={pet}
@@ -767,20 +847,20 @@ const Home = () => {
               ))}
             </div>
             {pages > 1 && (
-              <div className="flex items-center justify-center space-x-4 mt-10">
+              <div className="flex items-center justify-center space-x-4 mt-8">
                 <Button variant="outline" size="sm" disabled={page===1} onClick={()=>handlePageChange(page-1)} icon={<ArrowLeft size={16}/>}>Prev</Button>
-                <span className="text-sm text-gray-600 dark:text-gray-300">Page {page} of {pages}</span>
+                <span className="text-sm text-gray-600 dark:text-gray-300 px-4">Page {page} of {pages}</span>
                 <Button variant="outline" size="sm" disabled={page===pages} onClick={()=>handlePageChange(page+1)} icon={<ArrowRight size={16}/>}>Next</Button>
               </div>
             )}
-            <div className="mt-20">
-              <div className="relative overflow-hidden rounded-2xl border border-primary-200 dark:border-primary-900/40 bg-gradient-to-br from-primary-50 via-white to-secondary-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-900 p-8 flex flex-col md:flex-row items-start md:items-center gap-8">
+            <div className="mt-16">
+              <div className="relative overflow-hidden rounded-2xl border border-primary-200 dark:border-primary-900/40 bg-gradient-to-br from-primary-50 via-white to-secondary-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-900 p-8 flex flex-col md:flex-row items-start md:items-center gap-6">
                 <div className="flex-1">
                   <h3 className="text-2xl font-bold mb-3 bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">Ready to Change a Life?</h3>
                   <p className="text-gray-700 dark:text-gray-300 max-w-2xl text-sm md:text-base leading-relaxed">Create an account to like pets, get personalized recommendations, and track your adoption journey. Each adoption opens space for another rescue.</p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Button onClick={()=>document.getElementById('top')?.scrollIntoView({behavior:'smooth'})} variant="secondary" size="lg" icon={<ArrowUpRight size={18}/>}>Back to Top</Button>
+                  <Button onClick={()=>window.scrollTo({top:0, behavior:'smooth'})} variant="secondary" size="lg" icon={<ArrowUpRight size={18}/>}>Back to Top</Button>
                   <Button onClick={()=>window.location.href='/register'} size="lg" icon={<PlusCircle size={18}/>}>Get Started</Button>
                 </div>
                 <div className="absolute -right-10 -bottom-10 w-72 h-72 bg-primary-400/10 dark:bg-primary-600/20 rounded-full blur-3xl pointer-events-none" />
@@ -788,18 +868,19 @@ const Home = () => {
             </div>
           </>
         )}
+        </div>
 
         {/* FAQ SECTION */}
-        <SectionWrapper id="faq" className="pt-24 pb-16 border-t border-gray-200 dark:border-gray-800 mt-24">
+        <SectionWrapper id="faq" className="pt-16 pb-12 border-t border-gray-200 dark:border-gray-800 mt-16">
           <GradientTitle eyebrow="Clarity" title="Frequently Asked" highlight="Questions" sub="Still curious? These cover the fundamentals. We're expanding education resources soon." />
           <FAQ />
         </SectionWrapper>
 
         {/* FINAL CTA */}
-        <div className="mt-8 mb-20">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-600 via-primary-500 to-secondary-500 p-10 md:p-14 text-white flex flex-col md:flex-row items-start md:items-center gap-10 shadow-xl">
+        <div className="mt-8 mb-16">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-600 via-primary-500 to-secondary-500 p-8 md:p-12 text-white flex flex-col md:flex-row items-start md:items-center gap-8 shadow-xl">
             <div className="flex-1">
-              <h3 className="text-3xl md:text-4xl font-extrabold mb-4 leading-tight">Build a Compassionate, Data‑Smart Adoption Journey</h3>
+              <h3 className="text-2xl md:text-3xl font-extrabold mb-4 leading-tight">Build a Compassionate, Data‑Smart Adoption Journey</h3>
               <p className="text-white/90 text-base md:text-lg max-w-2xl leading-relaxed">Join FurEverHome to access evolving recommendation intelligence, transparent impact metrics, and a humane adoption workflow that respects time, trust and wellbeing—at scale.</p>
             </div>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
