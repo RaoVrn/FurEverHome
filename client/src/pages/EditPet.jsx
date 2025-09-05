@@ -31,7 +31,11 @@ const EditPet = () => {
     contactPhone: '',
     contactEmail: '',
     image: '',
-    adoptionFee: '',
+  adoptionFee: '',
+  currency: 'USD',
+  originType: 'owned',
+  foundLocation: '',
+  foundDate: '' ,
     urgency: 'medium'
   });
 
@@ -68,6 +72,10 @@ const EditPet = () => {
         contactEmail: pet.contactEmail || '',
         image: pet.image || '',
         adoptionFee: pet.adoptionFee || '',
+        currency: pet.currency || 'USD',
+        originType: pet.originType || 'owned',
+        foundLocation: pet.foundLocation || '',
+        foundDate: pet.foundDate ? pet.foundDate.substring(0,10) : '',
         urgency: pet.urgency || 'medium'
       });
     } catch (error) {
@@ -80,10 +88,13 @@ const EditPet = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    setFormData(prev => {
+      const next = { ...prev, [name]: type === 'checkbox' ? checked : value };
+      if (name === 'originType' && value === 'stray') {
+        next.adoptionFee = 0;
+      }
+      return next;
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -96,7 +107,11 @@ const EditPet = () => {
 
     setSubmitting(true);
     try {
-      await API.put(`/pets/${id}`, formData);
+      const payload = { ...formData };
+      if (payload.originType === 'stray') {
+        payload.adoptionFee = 0;
+      }
+      await API.put(`/pets/${id}`, payload);
       toast.success('Pet updated successfully!');
       navigate(`/pets/${id}`);
     } catch (error) {
@@ -310,14 +325,63 @@ const EditPet = () => {
                 value={formData.contactEmail}
                 onChange={handleInputChange}
               />
-              <Input
-                label="Adoption Fee ($)"
-                name="adoptionFee"
-                type="number"
-                min="0"
-                value={formData.adoptionFee}
-                onChange={handleInputChange}
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Pet Origin</label>
+                <select
+                  name="originType"
+                  value={formData.originType}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                >
+                  <option value="owned">Owned / Rehoming</option>
+                  <option value="stray">Stray / Rescued</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-5 gap-2 md:col-span-2">
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Currency</label>
+                  <select
+                    name="currency"
+                    value={formData.currency}
+                    onChange={handleInputChange}
+                    disabled={formData.originType==='stray'}
+                    className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${formData.originType==='stray' ? 'opacity-60 cursor-not-allowed':''}`}
+                  >
+                    {['USD','EUR','GBP','INR','AUD','CAD','JPY'].map(c=> <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div className="col-span-3">
+                  <Input
+                    label={`Adoption Fee ${formData.originType==='stray' ? '(Free for Stray)' : `(${formData.currency})`}`}
+                    name="adoptionFee"
+                    type="number"
+                    min="0"
+                    value={formData.adoptionFee}
+                    onChange={handleInputChange}
+                    disabled={formData.originType==='stray'}
+                  />
+                </div>
+              </div>
+              {formData.originType==='stray' && (
+                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    label="Found Location"
+                    name="foundLocation"
+                    value={formData.foundLocation}
+                    onChange={handleInputChange}
+                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Found Date</label>
+                    <input
+                      type="date"
+                      name="foundDate"
+                      value={formData.foundDate}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                    />
+                  </div>
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Urgency Level

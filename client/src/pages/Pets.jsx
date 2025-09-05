@@ -7,7 +7,8 @@ const Pets = () => {
     breed: '',
     minAge: '',
     maxAge: '',
-    status: ''
+    status: '',
+    originType: ''
   });
 
   const fetchPets = async () => {
@@ -34,7 +35,7 @@ const Pets = () => {
     <div>
       <h1>Available Pets</h1>
 
-      <div>
+  <div>
         <input
           placeholder="Breed"
           name="breed"
@@ -60,16 +61,32 @@ const Pets = () => {
           <option value="available">Available</option>
           <option value="adopted">Adopted</option>
         </select>
+        <select name="originType" value={filters.originType} onChange={handleFilterChange}>
+          <option value="">Any Origin</option>
+          <option value="owned">Owned</option>
+          <option value="stray">Stray</option>
+        </select>
         <button onClick={applyFilters}>Apply Filters</button>
       </div>
 
       <ul>
         {pets.map((pet) => (
-          <li key={pet._id}>
-            <h3>{pet.name} ({pet.breed})</h3>
-            <p>Age: {pet.age}</p>
-            <p>{pet.description}</p>
-            <p>Status: {pet.adopted ? 'Adopted' : 'Available'}</p>
+          <li key={pet._id} style={{marginBottom:'1rem',border:'1px solid #ccc',padding:'0.75rem',borderRadius:8}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+              <h3 style={{margin:0}}>{pet.name} {pet.breed && `(${pet.breed})`}</h3>
+              <span style={{fontSize:12,padding:'2px 8px',borderRadius:12,background: pet.originType==='stray' ? '#D1FAE5':'#DBEAFE',color:'#111'}}>
+                {pet.originType==='stray' ? 'Stray / Rescued' : 'Owned'}
+              </span>
+            </div>
+            <p style={{margin:'4px 0'}}>Age: {pet.age}</p>
+            <p style={{margin:'4px 0'}}>{pet.description}</p>
+            <p style={{margin:'4px 0'}}>Status: {pet.status}</p>
+            <p style={{margin:'4px 0',fontWeight:600}}>
+              {pet.originType==='stray' ? 'Free Adoption' : (pet.adoptionFee>0 ? `${pet.currency || 'USD'} ${pet.adoptionFee}` : 'No Fee')}
+            </p>
+            {pet.originType==='stray' && pet.foundLocation && (
+              <p style={{margin:'4px 0',fontSize:12,color:'#555'}}>Found: {pet.foundLocation}{pet.foundDate ? ` • ${new Date(pet.foundDate).toLocaleDateString()}`:''}</p>
+            )}
           </li>
         ))}
       </ul>

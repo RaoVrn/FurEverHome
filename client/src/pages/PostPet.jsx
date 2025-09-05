@@ -34,9 +34,15 @@ const PostPet = () => {
       urgency: 'medium',
       vaccinated: false,
       neutered: false,
-      adoptionFee: 0
+    adoptionFee: 0,
+    currency: 'USD',
+    originType: 'owned'
     }
   });
+
+  const originType = watch('originType');
+  const currency = watch('currency');
+  const currencyOptions = ['USD','EUR','GBP','INR','AUD','CAD','JPY'];
 
   const categories = [
     { value: 'dog', label: 'Dog 🐕', emoji: '🐕' },
@@ -147,7 +153,7 @@ const PostPet = () => {
       const petData = {
         ...data,
         age: Number(data.age),
-        adoptionFee: Number(data.adoptionFee) || 0,
+        adoptionFee: data.originType === 'stray' ? 0 : (Number(data.adoptionFee) || 0),
         image: images[0],
         images,
         photos: images,
@@ -199,6 +205,44 @@ const PostPet = () => {
 
       <div className="-mt-10 relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
+          {/* Listing Type */}
+          <Card className="p-6">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Listing Type</h2>
+            <div className="flex flex-col md:flex-row md:items-center gap-6 md:gap-10">
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    value="owned"
+                    {...register('originType')}
+                    checked={originType==='owned'}
+                    onChange={(e)=>{ setValue('originType', e.target.value); }}
+                    className="text-primary-600 focus:ring-primary-500"
+                  />
+                  <span className="text-sm font-medium text-gray-800 dark:text-gray-200">Owned / Rehoming</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    value="stray"
+                    {...register('originType')}
+                    checked={originType==='stray'}
+                    onChange={(e)=>{ setValue('originType', e.target.value); setValue('adoptionFee', 0); }}
+                    className="text-primary-600 focus:ring-primary-500"
+                  />
+                  <span className="text-sm font-medium text-gray-800 dark:text-gray-200">Stray / Rescued</span>
+                </label>
+              </div>
+              <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                {originType==='owned' ? (
+                  <p>Rehome your pet responsibly. Provide complete info to help adopters decide.</p>
+                ) : (
+                  <p>This is a rescued or stray animal. Adoption will be free and some details can be approximate.</p>
+                )}
+              </div>
+            </div>
+          </Card>
+
           {/* Photos */}
           <Card className="p-8">
             <div className="flex items-center justify-between mb-6">
@@ -244,13 +288,13 @@ const PostPet = () => {
           {/* Basic Information */}
           <Card className="p-8">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2"><PawPrint size={18}/> Basic Information</h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2"><PawPrint size={18}/> {originType==='stray' ? 'Rescued Animal Details' : 'Basic Information'}</h2>
               <span className="text-xs text-gray-500 dark:text-gray-400">* Required fields</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Input
-                label="Pet Name *"
-                placeholder="e.g., Buddy, Whiskers"
+                label={originType==='stray' ? 'Temporary Name *' : 'Pet Name *'}
+                placeholder={originType==='stray' ? 'Give a temporary friendly name' : 'e.g., Buddy, Whiskers'}
                 error={errors.name?.message}
                 {...register('name', {
                   required: 'Pet name is required',
@@ -279,14 +323,14 @@ const PostPet = () => {
               </div>
 
               <Input
-                label="Breed *"
-                placeholder="e.g., Labrador Retriever, Persian"
+                label={originType==='stray' ? 'Breed (if known)' : 'Breed *'}
+                placeholder={originType==='stray' ? 'Unknown or best guess (e.g., mixed)' : 'e.g., Labrador Retriever, Persian'}
                 error={errors.breed?.message}
-                {...register('breed', { required: 'Breed is required' })}
+                {...register('breed', { validate: v => (originType==='stray' ? true : !!v) || 'Breed is required' })}
               />
 
               <Input
-                label="Age (years) *"
+                label={originType==='stray' ? 'Approx Age (years) *' : 'Age (years) *'}
                 type="number"
                 placeholder="e.g., 2"
                 error={errors.age?.message}
@@ -336,8 +380,22 @@ const PostPet = () => {
 
               <Input label="Color" placeholder="e.g., Brown, Black & White" {...register('color')} />
 
-              <Input label="Weight (kg)" type="number" step="0.1" placeholder="e.g., 12.5" {...register('weight')} />
+              <Input label={originType==='stray' ? 'Approx Weight (kg)' : 'Weight (kg)'} type="number" step="0.1" placeholder="e.g., 12.5" {...register('weight')} />
             </div>
+
+            {originType==='stray' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <Input
+                  label="Found Location"
+                  placeholder="Where was the animal found?"
+                  {...register('foundLocation')}
+                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Found Date</label>
+                  <input type="date" className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" {...register('foundDate')} />
+                </div>
+              </div>
+            )}
           </Card>
 
           {/* Description & Health */}
@@ -471,12 +529,33 @@ const PostPet = () => {
                 {...register('contactEmail')}
               />
 
-              <Input
-                label="Adoption Fee ($)"
-                type="number"
-                placeholder="0"
-                {...register('adoptionFee')}
-              />
+              {/* Currency & Adoption Fee (disabled for stray) */}
+              <div className="flex flex-col md:flex-row gap-3 md:items-end md:col-span-2">
+                <div className="w-full md:w-40">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Currency</label>
+                  <select
+                    disabled={originType==='stray'}
+                    className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${originType==='stray' ? 'opacity-60 cursor-not-allowed':''}`}
+                    {...register('currency')}
+                  >
+                    {currencyOptions.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div className="flex-1">
+                  <Input
+                    label={`Adoption Fee ${originType==='stray' ? '(Free for Stray)' : `(${currency})`}`}
+                    type="number"
+                    placeholder="0"
+                    disabled={originType==='stray'}
+                    {...register('adoptionFee')}
+                  />
+                </div>
+                {originType==='stray' && (
+                  <div className="flex items-center text-sm font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg px-4 py-2 border border-emerald-200 dark:border-emerald-800/50">
+                    Free Adoption
+                  </div>
+                )}
+              </div>
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Urgency Level</label>

@@ -25,7 +25,8 @@ exports.addPet = async (req, res, next) => {
       name, age, breed, category, gender, size, color, description,
       healthDetails, vaccinated, neutered, location, coordinates,
       temperament, goodWith, activityLevel, specialNeeds,
-      photos, images, videos, adoptionFee, urgency, weight, dietaryNeeds
+      photos, images, videos, adoptionFee, urgency, weight, dietaryNeeds,
+      currency, originType, foundLocation, foundDate
     } = raw;
 
     // Backward compatibility alias
@@ -35,6 +36,15 @@ exports.addPet = async (req, res, next) => {
     // Coerce numeric fields
     if (age !== undefined) age = Number(age);
     if (adoptionFee !== undefined) adoptionFee = Number(adoptionFee) || 0;
+
+    // Normalize currency (default USD) & originType
+    currency = (currency || 'USD').toString().toUpperCase().slice(0,3);
+    originType = originType === 'stray' ? 'stray' : 'owned';
+
+    // Stray pets are always free
+    if (originType === 'stray') {
+      adoptionFee = 0;
+    }
 
     // Enhanced validation
     // NOTE: size was causing frequent user errors; treat as optional and default to 'medium'
@@ -72,7 +82,11 @@ exports.addPet = async (req, res, next) => {
   photos: photos.length ? photos : ['data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDYwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI2MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjIyNSIgY3k9IjE2NSIgcj0iMjUiIGZpbGw9IiM5Q0EzQUYiLz4KPGNpcmNsZSBjeD0iMzc1IiBjeT0iMTY1IiByPSIyNSIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMzAwIDI2MEM3MjcuNjEyIDI2MCA0NSAyNDIuNTkxIDQ1IDIyMEM0NSAxOTcuNDA5IDEzNC40MDggMTgwIDMwMCAxODBDNDY1LjU5MiAxODAgNTU1IDE5Ny40MDkgNTU1IDIyMEM1NTUgMjQyLjU5MSA0NjUuNTkyIDI2MCAzMDAgMjYwWiIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMTgwIDMyMEg0MjBWMzIwQzQyMCAzMzEuMDQ2IDQxMS4wNDYgMzQwIDQwMCAzNDBIMjAwQzE4OC45NTQgMzQwIDE4MCAzMzEuMDQ2IDE4MCAzMjBWMzIwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'],
   image: (photos && photos[0]) || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDYwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI2MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjIyNSIgY3k9IjE2NSIgcj0iMjUiIGZpbGw9IiM5Q0EzQUYiLz4KPGNpcmNsZSBjeD0iMzc1IiBjeT0iMTY1IiByPSIyNSIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMzAwIDI2MEM3MjcuNjEyIDI2MCA0NSAyNDIuNTkxIDQ1IDIyMEM0NSAxOTcuNDA5IDEzNC40MDggMTgwIDMwMCAxODBDNDY1LjU5MiAxODAgNTU1IDE5Ny40MDkgNTU1IDIyMEM1NTUgMjQyLjU5MSA0NjUuNTkyIDI2MCAzMDAgMjYwWiIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMTgwIDMyMEg0MjBWMzIwQzQyMCAzMzEuMDQ2IDQxMS4wNDYgMzQwIDQwMCAzNDBIMjAwQzE4OC45NTQgMzQwIDE4MCAzMzEuMDQ2IDE4MCAzMjBWMzIwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K', // For backward compatibility
       videos: videos || [],
-      adoptionFee: adoptionFee || 0,
+  adoptionFee: adoptionFee || 0,
+  currency,
+  originType,
+  foundLocation: originType === 'stray' ? (foundLocation || location) : undefined,
+  foundDate: originType === 'stray' && foundDate ? new Date(foundDate) : undefined,
       urgency: urgency || 'medium',
       temperament: temperament || [],
       goodWith: goodWith || {
@@ -100,7 +114,11 @@ exports.addPet = async (req, res, next) => {
 // Get all pets (available only)
 exports.getAllPets = async (req, res) => {
   try {
-    const pets = await Pet.find({ status: 'available' })
+    const query = { status: 'available' };
+    if (req.query.originType && ['owned','stray'].includes(req.query.originType)) {
+      query.originType = req.query.originType;
+    }
+    const pets = await Pet.find(query)
       .populate('postedBy', 'name email phone location')
       .sort({ urgency: -1, createdAt: -1 });
     res.json(pets);
@@ -247,6 +265,22 @@ exports.updatePet = async (req, res, next) => {
       updateData.image = photos[0]; // Set first photo as main image for backward compatibility
     }
 
+    // Normalize currency/originType if provided
+    if (updateData.currency) {
+      updateData.currency = updateData.currency.toString().toUpperCase().slice(0,3);
+    }
+    if (updateData.originType) {
+      updateData.originType = updateData.originType === 'stray' ? 'stray' : 'owned';
+      if (updateData.originType === 'stray') {
+        updateData.adoptionFee = 0; // enforce free
+        if (!updateData.foundLocation) updateData.foundLocation = pet.location;
+        if (updateData.foundDate) updateData.foundDate = new Date(updateData.foundDate);
+      } else {
+        // If switching back to owned and fee not provided keep existing
+        if (updateData.adoptionFee === undefined) updateData.adoptionFee = pet.adoptionFee;
+      }
+    }
+
     Object.assign(pet, updateData);
     await pet.save();
 
@@ -302,12 +336,13 @@ exports.deletePet = async (req, res, next) => {
 // Search pets
 exports.searchPets = async (req, res) => {
   try {
-    const { name, breed, category } = req.query;
-    const query = {};
+  const { name, breed, category, originType } = req.query;
+  const query = {};
 
     if (name) query.name = { $regex: name, $options: 'i' };
     if (breed) query.breed = { $regex: breed, $options: 'i' };
-    if (category) query.category = category;
+  if (category) query.category = category;
+  if (originType && ['owned','stray'].includes(originType)) query.originType = originType;
 
     const pets = await Pet.find(query).populate('postedBy', 'name email phone location');
 

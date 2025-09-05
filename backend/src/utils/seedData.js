@@ -22,7 +22,9 @@ const samplePets = [
     ],
     temperament: ['Friendly', 'Energetic', 'Loyal'],
     goodWith: { children: true, dogs: true, cats: false },
-    activityLevel: 'high'
+  activityLevel: 'high',
+  currency: 'USD',
+  originType: 'owned'
   },
   {
     name: 'Whiskers',
@@ -43,7 +45,9 @@ const samplePets = [
     ],
     temperament: ['Calm', 'Gentle', 'Affectionate'],
     goodWith: { children: true, dogs: false, cats: true },
-    activityLevel: 'low'
+  activityLevel: 'low',
+  currency: 'USD',
+  originType: 'owned'
   },
   {
     name: 'Max',
@@ -64,7 +68,34 @@ const samplePets = [
     ],
     temperament: ['Loyal', 'Protective', 'Intelligent'],
     goodWith: { children: true, dogs: true, cats: false },
-    activityLevel: 'high'
+    activityLevel: 'high',
+    currency: 'USD',
+    originType: 'owned'
+  },
+  {
+    name: 'Shadow',
+    age: 2,
+    breed: 'Mixed',
+    category: 'dog',
+    gender: 'female',
+    size: 'medium',
+    color: 'Black',
+    description: 'Rescued from the streets, gentle and a bit shy but warming up quickly.',
+    vaccinated: false,
+    neutered: false,
+    location: 'Austin, TX',
+    adoptionFee: 0,
+    urgency: 'medium',
+    photos: [
+      'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDYwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI2MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjMTMxMzEzIi8+CjxjaXJjbGUgY3g9IjIyNSIgY3k9IjE2NSIgcj0iMjUiIGZpbGw9IiM0NDQ0NDQiLz4KPGNpcmNsZSBjeD0iMzc1IiBjeT0iMTY1IiByPSIyNSIgZmlsbD0iIzQ0NDQ0NCIvPgo8cGF0aCBkPSJNMzAwIDI2MEM3MjcuNjEyIDI2MCA0NSAyNDIuNTkxIDQ1IDIyMEM0NSAxOTcuNDA5IDEzNC40MDggMTgwIDMwMCAxODBDNDY1LjU5MiAxODAgNTU1IDE5Ny40MDkgNTU1IDIyMEM1NTUgMjQyLjU5MSA0NjUuNTkyIDI2MCAzMDAgMjYwWiIgZmlsbD0iIzQ0NDQ0NCIvPgo8cGF0aCBkPSJNMTgwIDMyMEg0MjBWMzIwQzQyMCAzMzEuMDQ2IDQxMS4wNDYgMzQwIDQwMCAzNDBIMjAwQzE4OC45NTQgMzQwIDE4MCAzMzEuMDQ2IDE4MCAzMjBWMzIwWiIgZmlsbD0iIzQ0NDQ0NCIvPgo8L3N2Zz4K'
+    ],
+    temperament: ['Shy','Gentle'],
+    goodWith: { children: true, dogs: true, cats: true },
+    activityLevel: 'low',
+    currency: 'USD',
+    originType: 'stray',
+    foundLocation: 'Downtown Austin',
+    foundDate: new Date()
   }
 ];
 

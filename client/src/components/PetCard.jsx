@@ -209,10 +209,14 @@ const PetCard = ({ pet, onAdopt, onLike, showOwnerActions = false, showAdoptButt
           </div>
 
           {/* Adoption fee */}
-          {pet.adoptionFee > 0 && (
+          {pet.originType === 'stray' ? (
+            <div className="mb-3">
+              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">Free (Stray)</span>
+            </div>
+          ) : pet.adoptionFee > 0 && (
             <div className="mb-3">
               <span className="text-lg font-bold text-primary-600">
-                ${pet.adoptionFee}
+                {pet.currency ? `${pet.currency} ` : '$'}{pet.adoptionFee}
               </span>
               <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">
                 adoption fee

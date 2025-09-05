@@ -21,48 +21,46 @@ const PetDetails = () => {
   const [adopting, setAdopting] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [mainIndex, setMainIndex] = useState(0);
+  const [showFullDesc, setShowFullDesc] = useState(false);
+  const userId = user?.id;
 
+  // Fetch pet details (runs on id or user change)
   useEffect(() => {
-    fetchPetDetails();
-  }, [id]);
-
-  const fetchPetDetails = async () => {
-    try {
-      const response = await API.get(`/pets/${id}`);
-      
-      // Check if we got pet data directly or with similarPets
-      const petData = response.data.pet || response.data;
-      
-      // Make sure we have an array for photos and images for backward compatibility
-      if (!petData.photos && petData.image) {
-        petData.photos = [petData.image];
-      } else if (!petData.photos) {
-        petData.photos = ['data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDYwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI2MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Im0yNTMuMzM0IDI2Ni42NjYgNzIuMzMzLTU3LjMzMiA1MS4zMzMgNDAuOTk5IDEyMC0xMDUuMzMzIDM1LjMzMyAzMS4zMzNjLTEyLjY2NiA5MC4zMzMtMTAwLjMzMyAxNDQuNjY2LTE3OSAyMDIuMzMzLTc4LjY2Ny01Ny42NjctMTY2LjMzMy0xMTItMTc5LTIwMi4zMzNsMzUuMzMzLTMxLjMzMyA0My42NjggMTIxLjMzNloiIGZpbGw9IiNEMUQ1REIiLz4KPGNpcmNsZSBjeD0iMzAwIiBjeT0iMjAwIiByPSIzOCIgZmlsbD0iIzlDQTNBRiIvPgo8dGV4dCB4PSIzMDAiIHk9IjMyNSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjNjc3Mzg5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5ObyBJbWFnZSBBdmFpbGFibGU8L3RleHQ+Cjwvc3ZnPgo='];
-      }
-      
-      // For legacy support
-      if (!petData.images && petData.photos) {
-        petData.images = petData.photos;
-      }
-      
-      // Normalize relative image paths
-      if (petData.photos) {
+    let isMounted = true;
+    (async () => {
+      try {
+        const response = await API.get(`/pets/${id}`);
+        const raw = response.data.pet || response.data;
+        const petData = { ...raw };
+        if (!petData.photos && petData.image) petData.photos = [petData.image];
+        if (!petData.photos) {
+          petData.photos = ['data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDYwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI2MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Im0yNTMuMzM0IDI2Ni42NjYgNzIuMzMzLTU3LjMzMiA1MS4zMzMgNDAuOTk5IDEyMC0xMDUuMzMzIDM1LjMzMyAzMS4zMzNjLTEyLjY2NiA5MC4zMzMtMTAwLjMzMyAxNDQuNjY2LTE3OSAyMDIuMzMzLTc4LjY2Ny01Ny42NjctMTY2LjMzMy0xMTItMTc5LTIwMi4zMzNsMzUuMzMzLTMxLjMzMyA0My42NjggMTIxLjMzNloiIGZpbGw9IiNEMUQ1REIiLz4KPGNpcmNsZSBjeD0iMzAwIiBjeT0iMjAwIiByPSIzOCIgZmlsbD0iIzlDQTNBRiIvPgo8dGV4dCB4PSIzMDAiIHk9IjMyNSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjNjc3Mzg5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5ObyBJbWFnZSBBdmFpbGFibGU8L3RleHQ+Cjwvc3ZnPgo='];
+        }
+        if (!petData.images && petData.photos) petData.images = petData.photos;
         petData.photos = petData.photos.map(p => p?.startsWith('/uploads') ? `http://localhost:5000${p}` : p);
+        if (petData.image && petData.image.startsWith('/uploads')) petData.image = `http://localhost:5000${petData.image}`;
+        if (isMounted) {
+          setPet(petData);
+          setIsLiked(petData.isLiked || (userId ? petData.likes?.some(l=> l===userId || l?._id===userId) : false));
+        }
+      } catch (error) {
+        console.error('Error fetching pet details:', error);
+        toast.error('Pet not found');
+        navigate('/pets');
+      } finally {
+        if (isMounted) setLoading(false);
       }
-      if (petData.image && petData.image.startsWith('/uploads')) {
-        petData.image = `http://localhost:5000${petData.image}`;
-      }
-      setPet(petData);
-      setIsLiked(petData.isLiked || (user?.id ? petData.likes?.includes(user.id) : false));
-      
-    } catch (error) {
-      console.error('Error fetching pet details:', error);
-      toast.error('Pet not found');
-      navigate('/pets');
-    } finally {
-      setLoading(false);
+    })();
+    return () => { isMounted = false; };
+  }, [id, userId, navigate]);
+
+  // Keep mainIndex in range (must be before any early returns to keep hooks order stable)
+  useEffect(() => {
+    if (pet?.photos && pet.photos.length && mainIndex >= pet.photos.length) {
+      setMainIndex(0);
     }
-  };
+  }, [mainIndex, pet?.photos?.length]);
 
   const handleAdopt = async () => {
     if (!isAuthenticated) {
@@ -93,13 +91,28 @@ const PetDetails = () => {
       toast.error('Please login to like pets');
       return;
     }
-
+    // Optimistic update
+    const prevLiked = isLiked;
+    const prevPet = JSON.parse(JSON.stringify(pet));
+    setIsLiked(!prevLiked);
+    setPet(prev => {
+      const currentLikes = Array.isArray(prev.likes) ? [...prev.likes] : [];
+      const already = currentLikes.some(l=> l===userId || l?._id===userId);
+      let updatedLikes;
+      if (!prevLiked && !already) updatedLikes = [...currentLikes, userId];
+      else if (prevLiked && already) updatedLikes = currentLikes.filter(l=> (l===userId || l?._id===userId) ? false : true);
+      else updatedLikes = currentLikes;
+      return { ...prev, likes: updatedLikes };
+    });
     try {
       const response = await API.post(`/pets/${pet._id}/like`);
       const { likes, liked } = response.data;
       setIsLiked(liked);
-      setPet(prev => ({ ...prev, likeCount: likes, likes: Array(likes).fill(0) }));
+      setPet(prev => ({ ...prev, likeCount: likes }));
     } catch (error) {
+      // revert
+      setIsLiked(prevLiked);
+      setPet(prevPet);
       console.error('Like error (details):', error.response?.data || error.message);
       toast.error(error.response?.data?.message || 'Failed to update like status');
     }
@@ -181,8 +194,17 @@ const PetDetails = () => {
     );
   }
 
+  // Derived values (no need for useMemo here; inexpensive)
+  const likeCount = Array.isArray(pet?.likes) ? pet.likes.length : (pet?.likeCount || 0);
+  const description = pet?.description || 'No description available.';
+  const lineBreaks = (description.match(/\n/g) || []).length;
+  const isLongDescription = description.length > 320 || lineBreaks > 3;
+  const photos = pet?.photos || [];
+
+  // (index range handled in effect above)
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <Button
@@ -194,88 +216,100 @@ const PetDetails = () => {
           Back
         </Button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-14">
           {/* Pet Images */}
-          <div className="space-y-4">
-            <div className="relative">
+          <div className="space-y-5">
+            <div className="relative rounded-xl overflow-hidden shadow-lg ring-1 ring-gray-200/60 dark:ring-gray-700/60 bg-gray-100 dark:bg-gray-800">
               <img
-                src={(pet.photos && pet.photos.length > 0) 
-                    ? pet.photos[0] 
-                    : pet.image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDYwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI2MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjIyNSIgY3k9IjE2NSIgcj0iMjUiIGZpbGw9IiM5Q0EzQUYiLz4KPGNpcmNsZSBjeD0iMzc1IiBjeT0iMTY1IiByPSIyNSIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMzAwIDI2MEM3MjcuNjEyIDI2MCA0NSAyNDIuNTkxIDQ1IDIyMEM0NSAxOTcuNDA5IDEzNC40MDggMTgwIDMwMCAxODBDNDY1LjU5MiAxODAgNTU1IDE5Ny40MDkgNTU1IDIyMEM1NTUgMjQyLjU5MSA0NjUuNTkyIDI2MCAzMDAgMjYwWiIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMTgwIDMyMEg0MjBWMzIwQzQyMCAzMzEuMDQ2IDQxMS4wNDYgMzQwIDQwMCAzNDBIMjAwQzE4OC45NTQgMzQwIDE4MCAzMzEuMDQ2IDE4MCAzMjBWMzIwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'}
+                src={photos.length ? photos[mainIndex] : (pet.image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDYwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI2MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjIyNSIgY3k9IjE2NSIgcj0iMjUiIGZpbGw9IiM5Q0EzQUYiLz4KPGNpcmNsZSBjeD0iMzc1IiBjeT0iMTY1IiByPSIyNSIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMzAwIDI2MEM3MjcuNjEyIDI2MCA0NSAyNDIuNTkxIDQ1IDIyMEM0NSAxOTcuNDA5IDEzNC40MDggMTgwIDMwMCAxODBDNDY1LjU5MiAxODAgNTU1IDE5Ny40MDkgNTU1IDIyMEM1NTUgMjQyLjU5MSA0NjUuNTkyIDI2MCAzMDAgMjYwWiIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMTgwIDMyMEg0MjBWMzIwQzQyMCAzMzEuMDQ2IDQxMS4wNDYgMzQwIDQwMCAzNDBIMjAwQzE4OC45NTQgMzQwIDE4MCAzMzEuMDQ2IDE4MCAzMjBWMzIwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K')}
                 alt={pet.name}
-                className="w-full h-96 object-cover rounded-lg shadow-lg"
-                onError={(e) => {
-                  e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDYwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI2MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjIyNSIgY3k9IjE2NSIgcj0iMjUiIGZpbGw9IiM5Q0EzQUYiLz4KPGNpcmNsZSBjeD0iMzc1IiBjeT0iMTY1IiByPSIyNSIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMzAwIDI2MEM3MjcuNjEyIDI2MCA0NSAyNDIuNTkxIDQ1IDIyMEM0NSAxOTcuNDA5IDEzNC40MDggMTgwIDMwMCAxODBDNDY1LjU5MiAxODAgNTU1IDE5Ny40MDkgNTU1IDIyMEM1NTUgMjQyLjU5MSA0NjUuNTkyIDI2MCAzMDAgMjYwWiIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMTgwIDMyMEg0MjBWMzIwQzQyMCAzMzEuMDQ2IDQxMS4wNDYgMzQwIDQwMCAzNDBIMjAwQzE4OC45NTQgMzQwIDE4MCAzMzEuMDQ2IDE4MCAzMjBWMzIwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
-                }}
+                className="w-full h-96 object-cover transition-all duration-700 ease-in-out"
+                onError={(e) => { e.target.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDYwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI2MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjIyNSIgY3k9IjE2NSIgcj0iMjUiIGZpbGw9IiM5Q0EzQUYiLz4KPGNpcmNsZSBjeD0iMzc1IiBjeT0iMTY1IiByPSIyNSIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMzAwIDI2MEM3MjcuNjEyIDI2MCA0NSAyNDIuNTkxIDQ1IDIyMEM0NSAxOTcuNDA5IDEzNC40MDggMTgwIDMwMCAxODBDNDY1LjU5MiAxODAgNTU1IDE5Ny40MDkgNTU1IDIyMEM1NTUgMjQyLjU5MSA0NjUuNTkyIDI2MCAzMDAgMjYwWiIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMTgwIDMyMEg0MjBWMzIwQzQyMCAzMzEuMDQ2IDQxMS4wNDYgMzQwIDQwMCAzNDBIMjAwQzE4OC45NTQgMzQwIDE4MCAzMzEuMDQ2IDE4MCAzMjBWMzIwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'; }}
               />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-black/40 via-black/0 to-black/0" />
               
               {/* Status Badge */}
               <div className="absolute top-4 left-4">
                 {pet.status === 'adopted' ? (
-                  <span className="px-3 py-1 bg-green-500 text-white rounded-full text-sm font-medium">
+                  <span className="px-3 py-1 bg-emerald-500/90 backdrop-blur text-white rounded-full text-sm font-semibold tracking-wide shadow">
                     Adopted
                   </span>
                 ) : (
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getUrgencyColor(pet.urgency)}`}>
+                  <span className={`px-3 py-1 rounded-full text-sm font-semibold tracking-wide border shadow-sm ${getUrgencyColor(pet.urgency)}`}>
                     {pet.urgency?.charAt(0).toUpperCase() + pet.urgency?.slice(1)} Priority
                   </span>
                 )}
               </div>
 
               {/* Action Buttons */}
-              <div className="absolute top-4 right-4 flex space-x-2">
-                <Button
-                  variant={isLiked ? 'danger' : 'secondary'}
-                  size="sm"
+              <div className="absolute top-4 right-4 flex space-x-2 items-center">
+                <button
                   onClick={handleLike}
-                  icon={<Heart size={16} fill={isLiked ? 'currentColor' : 'none'} />}
-                  className="backdrop-blur-sm"
-                />
-                <Button
-                  variant="secondary"
-                  size="sm"
+                  aria-pressed={isLiked}
+                  aria-label={isLiked? 'Unlike pet':'Like pet'}
+                  className={`relative group p-2 rounded-full shadow-md transition-all backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 ${isLiked? 'bg-rose-500 text-white scale-105 animate-pulse':'bg-white/90 text-gray-700 hover:bg-rose-500 hover:text-white'}`}
+                >
+                  <Heart size={18} className={isLiked? 'fill-current drop-shadow':''} />
+                  <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[10px] font-medium text-white bg-black/60 px-2 py-0.5 rounded-full">{likeCount}</span>
+                </button>
+                <button
                   onClick={handleShare}
-                  icon={<Share2 size={16} />}
-                  className="backdrop-blur-sm"
-                />
+                  aria-label="Share pet"
+                  className="p-2 rounded-full bg-white/90 text-gray-700 hover:bg-primary-600 hover:text-white transition shadow-md backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                >
+                  <Share2 size={16} />
+                </button>
               </div>
             </div>
 
             {/* Additional Images */}
-            {pet.photos && pet.photos.length > 1 && (
-              <div className="grid grid-cols-3 gap-2">
-                {pet.photos.slice(1, 7).map((image, index) => (
-                  <img
-                    key={index}
-                    src={image}
-                    onError={(e) => {
-                      e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDE1MCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjU2IiBjeT0iNjIiIHI9IjEwIiBmaWxsPSIjOUNBM0FGIi8+CjxjaXJjbGUgY3g9Ijk0IiBjeT0iNjIiIHI9IjEwIiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik03NSA5NEM4MS42Mjc0IDk0IDg3IDg4LjYyNzQgODcgODJDODcgNzUuMzcyNiA4MS42Mjc0IDcwIDc1IDcwQzY4LjM3MjYgNzAgNjMgNzUuMzcyNiA2MyA4MkM2MyA4OC42Mjc0IDY4LjM3MjYgOTQgNzUgOTRaIiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik00NSAxMjBIMTA1VjEyMEMxMDUgMTI1LjUyMyAxMDAuNTIzIDEzMCA5NSAxMzBINTVDNDkuNDc3MiAxMzAgNDUgMTI1LjUyMyA0NSAxMjBWMTIwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
-                    }}
-                    alt={`${pet.name} ${index + 1}`}
-                    className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                  />
+            {photos.length > 1 && (
+              <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-7 gap-2">
+                {photos.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={()=>setMainIndex(idx)}
+                    className={`relative group rounded-lg overflow-hidden focus:outline-none ring-offset-2 ring-primary-500 ${mainIndex===idx? 'ring-2':'ring-0'} transition`}
+                    aria-label={`Show photo ${idx+1}`}
+                  >
+                    <img
+                      src={img}
+                      alt={`${pet.name} ${idx+1}`}
+                      className="w-full h-20 object-cover group-hover:opacity-90 transition"
+                      onError={(e)=>{ e.target.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDE1MCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjU2IiBjeT0iNjIiIHI9IjEwIiBmaWxsPSIjOUNBM0FGIi8+CjxjaXJjbGUgY3g9Ijk0IiBjeT0iNjIiIHI9IjEwIiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik03NSA5NEM4MS42Mjc0IDk0IDg3IDg4LjYyNzQgODcgODJDODcgNzUuMzcyNiA4MS42Mjc0IDcwIDc1IDcwQzY4LjM3MjYgNzAgNjMgNzUuMzcyNiA2MyA4MkM2MyA4OC42Mjc0IDY4LjM3MjYgOTQgNzUgOTRaIiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik00NSAxMjBIMTA1VjEyMEMxMDUgMTI1LjUyMyAxMDAuNTIzIDEzMCA5NSAxMzBINTVDNDkuNDc3MiAxMzAgNDUgMTI1LjUyMyA0NSAxMjBWMTIwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'; }}
+                    />
+                  </button>
                 ))}
               </div>
             )}
           </div>
 
           {/* Pet Information */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Basic Info */}
-            <Card>
-              <div className="flex items-start justify-between mb-4">
+            <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-sm">
+              <div className="flex items-start justify-between mb-6">
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
                     {pet.name} {getCategoryEmoji(pet.category)}
                   </h1>
-                  <p className="text-xl text-gray-600 dark:text-gray-400 mt-1">
+                  <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 mt-1 font-medium">
                     {pet.breed} • {pet.age} years old
                   </p>
                 </div>
-                {pet.adoptionFee > 0 && (
+                {pet.originType === 'stray' ? (
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-primary-600">
-                      ${pet.adoptionFee}
+                    <div className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 border border-emerald-200/60 dark:border-emerald-800/50 inline-block">
+                      Free Adoption (Stray)
+                    </div>
+                    {pet.foundLocation && (
+                      <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">Found: {pet.foundLocation}{pet.foundDate ? ` • ${new Date(pet.foundDate).toLocaleDateString()}`:''}</div>
+                    )}
+                  </div>
+                ) : pet.adoptionFee > 0 && (
+                  <div className="text-right">
+                    <div className="text-2xl font-bold bg-gradient-to-r from-primary-500 to-primary-600 bg-clip-text text-transparent">
+                      {pet.currency ? `${pet.currency} ` : '$'}{pet.adoptionFee}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400">
                       adoption fee
@@ -285,14 +319,14 @@ const PetDetails = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/70 rounded-lg border border-gray-200 dark:border-gray-600">
                   <div className="text-lg font-semibold text-gray-900 dark:text-white capitalize">
                     {pet.gender}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">Gender</div>
                 </div>
                 {pet.size && (
-                  <div className="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/70 rounded-lg border border-gray-200 dark:border-gray-600">
                     <div className="text-lg font-semibold text-gray-900 dark:text-white capitalize">
                       {pet.size}
                     </div>
@@ -302,29 +336,96 @@ const PetDetails = () => {
               </div>
 
               {/* Health Status */}
-              <div className="flex gap-2 mb-6">
+        <div className="flex gap-2 flex-wrap mb-6">
                 {pet.vaccinated && (
-                  <span className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+          <span className="flex items-center gap-1 px-3 py-1 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 rounded-full text-sm font-medium border border-emerald-200/60 dark:border-emerald-700/50">
                     <Shield size={14} />
                     Vaccinated
                   </span>
                 )}
                 {pet.neutered && (
-                  <span className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+          <span className="flex items-center gap-1 px-3 py-1 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded-full text-sm font-medium border border-indigo-200/60 dark:border-indigo-700/50">
                     <Award size={14} />
                     Neutered
                   </span>
                 )}
               </div>
 
+              {/* Extended Quick Facts */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                {pet.weight && (
+          <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700/70 border border-gray-200 dark:border-gray-600">
+                    <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Weight</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{pet.weight} kg</p>
+                  </div>
+                )}
+                {pet.activityLevel && (
+          <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700/70 border border-gray-200 dark:border-gray-600">
+                    <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Activity Level</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white capitalize">{pet.activityLevel}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Temperament & Good With */}
+              {(pet.temperament?.length || pet.goodWith?.length) && (
+                <div className="mb-6">
+                  {pet.temperament?.length > 0 && (
+                    <div className="mb-4">
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Temperament</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {pet.temperament.map(t => <span key={t} className="px-2 py-1 rounded-full text-xs bg-primary-100/70 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 border border-primary-200/50 dark:border-primary-800/40">{t}</span>)}
+                      </div>
+                    </div>
+                  )}
+                  {pet.goodWith?.length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Good With</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {pet.goodWith.map(g => <span key={g} className="px-2 py-1 rounded-full text-xs bg-emerald-100/70 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-800/40">{g}</span>)}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Dietary & Special Needs */}
+              {(pet.dietaryNeeds || pet.specialNeeds) && (
+                <div className="mb-6">
+                  {pet.dietaryNeeds && (
+                    <div className="mb-4">
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Dietary Needs</h3>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">{pet.dietaryNeeds}</p>
+                    </div>
+                  )}
+                  {pet.specialNeeds && (
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Special Care</h3>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">{pet.specialNeeds}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Description */}
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                   About {pet.name}
                 </h3>
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {pet.description || 'No description available.'}
+                <p 
+                  className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line relative mt-1"
+                  style={(!showFullDesc && isLongDescription) ? {display:'-webkit-box', WebkitLineClamp:6, WebkitBoxOrient:'vertical', overflow:'hidden'} : {}}
+                >
+                  {description}
                 </p>
+                {isLongDescription && (
+                  <button 
+                    onClick={()=>setShowFullDesc(s=>!s)} 
+                    className="mt-2 text-sm font-medium text-primary-600 hover:underline"
+                  >
+                    {showFullDesc? 'Show less':'Read more'}
+                  </button>
+                )}
               </div>
 
               {/* Medical History */}
@@ -340,15 +441,15 @@ const PetDetails = () => {
               )}
 
               {/* Stats */}
-              <div className="grid grid-cols-2 gap-4 py-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="grid grid-cols-2 gap-4 py-5 border-t border-gray-200 dark:border-gray-700">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary-600">
+                  <div className="text-2xl font-bold text-primary-600 flex items-center justify-center gap-1">
                     {pet.likes?.length || 0}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">Likes</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary-600">
+                  <div className="text-2xl font-bold text-primary-600 flex items-center justify-center gap-1">
                     {pet.views || 0}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">Views</div>
@@ -357,7 +458,7 @@ const PetDetails = () => {
             </Card>
 
             {/* Contact Info */}
-            <Card>
+            <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-sm">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 Posted by
               </h3>
@@ -389,7 +490,7 @@ const PetDetails = () => {
 
               {/* Action Buttons */}
               {pet.status === 'available' ? (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {/* Owner Controls */}
                   {pet.postedBy._id === user?.id ? (
                     <div className="flex space-x-3">
@@ -415,7 +516,7 @@ const PetDetails = () => {
                       onClick={handleAdopt}
                       loading={adopting}
                       disabled={!isAuthenticated}
-                      className="w-full"
+                      className="w-full font-semibold tracking-wide text-base"
                       size="lg"
                     >
                       {adopting ? 'Processing...' : 'Adopt Me'}
