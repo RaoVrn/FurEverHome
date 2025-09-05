@@ -26,6 +26,23 @@ const userSchema = new mongoose.Schema({
     newMessages: { type: Boolean, default: true },
     communityUpdates: { type: Boolean, default: false },
     marketingEmails: { type: Boolean, default: false }
+  },
+  groups: [{
+    group: { type: mongoose.Schema.Types.ObjectId, ref: 'Group' },
+    role: { type: String, enum: ['member', 'moderator', 'admin'], default: 'member' },
+    joinedAt: { type: Date, default: Date.now },
+    status: { type: String, enum: ['active', 'pending', 'banned'], default: 'active' }
+  }],
+  organizationDetails: {
+    organizationType: { 
+      type: String, 
+      enum: ['individual', 'ngo', 'shelter', 'rescue', 'community', 'veterinary', 'other'] 
+    },
+    registrationNumber: String,
+    website: String,
+    establishedYear: Number,
+    description: String,
+    isVerified: { type: Boolean, default: false }
   }
 }, { timestamps: true });
 

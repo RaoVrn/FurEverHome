@@ -9,6 +9,7 @@ const authRoutes = require('./routes/authRoutes');
 const petRoutes = require('./routes/petRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const groupRoutes = require('./routes/groupRoutes');
 
 // Import utilities
 const seedDatabase = require('./utils/seedData');
@@ -44,6 +45,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/pets', petRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/groups', groupRoutes);
 
 // Health check endpoints
 app.get('/health', (req, res) => {

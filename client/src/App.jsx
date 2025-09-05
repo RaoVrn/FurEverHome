@@ -25,6 +25,9 @@ import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import Community from './pages/Community';
 import AccountSettings from './pages/AccountSettings';
+import Groups from './pages/Groups';
+import GroupDetails from './pages/GroupDetails';
+import ManageGroup from './pages/ManageGroup';
 
 // Protected Route Component with admin redirection logic
 const ProtectedRoute = ({ element, adminOnly = false, path }) => {
@@ -99,6 +102,18 @@ const App = () => {
                   <Route 
                     path="/community" 
                     element={<Community />} 
+                  />
+                  <Route 
+                    path="/groups" 
+                    element={<ProtectedRoute element={<Groups />} />} 
+                  />
+                  <Route 
+                    path="/groups/:id" 
+                    element={<ProtectedRoute element={<GroupDetails />} />} 
+                  />
+                  <Route 
+                    path="/groups/:groupId/manage" 
+                    element={<ProtectedRoute element={<ManageGroup />} />} 
                   />
                   <Route 
                     path="/account-settings" 

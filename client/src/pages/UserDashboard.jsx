@@ -6,9 +6,10 @@ import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import PetCard from '../components/PetCard';
 import Loading from '../components/ui/Loading';
+import MyGroups from '../components/MyGroups';
 import {
   PawPrint, Heart, PlusCircle, Star, Rocket, RefreshCcw, User as UserIcon, Layers,
-  Trophy, Clock, Flame, ListChecks, Settings, ArrowRight, Compass, Globe2
+  Trophy, Clock, Flame, ListChecks, Settings, ArrowRight, Compass, Globe2, Users
 } from 'lucide-react';
 
 // Lightweight metric widget
@@ -38,6 +39,7 @@ const Section = ({ title, icon:Icon, action, children }) => (
 
 const UserDashboard = () => {
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState([]);
   const [posted, setPosted] = useState([]);
@@ -113,113 +115,128 @@ const UserDashboard = () => {
           <Metric icon={Clock} label="My Adoptions" value={adopted.length} accent="from-fuchsia-500 to-pink-500" />
         </div>
 
+        {/* Tab Navigation */}
+        <div className="mb-8">
+          <div className="border-b border-gray-200 dark:border-gray-700">
+            <nav className="-mb-px flex space-x-8">
+              {[
+                { id: 'overview', label: 'Overview', icon: Compass },
+                { id: 'groups', label: 'My Groups', icon: Users },
+                { id: 'pets', label: 'My Pets', icon: PawPrint },
+                { id: 'activity', label: 'Activity', icon: Clock }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${
+                    activeTab === tab.id
+                      ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+                >
+                  <tab.icon size={16} />
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </nav>
+          </div>
+        </div>
+
         {loading && <div className="py-20"><Loading text="Assembling your data..." size="lg" /></div>}
         {!loading && (
           <>
-            {/* Recommended */}
-            {recommended.length > 0 && (
-              <Section title="Recommended For You" icon={Star} action={<Button size="sm" variant="ghost" onClick={()=>wrap('rec', async ()=>{ const res = await API.get('/pets/recommended'); setRecommended(res.data||[]); })} loading={loadingMap.rec}>Refresh</Button>}>
-                <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {recommended.slice(0,8).map(p => <PetCard key={p._id} pet={p} showAdoptButton />)}
-                </div>
-              </Section>
-            )}
-
-            {/* Favorites */}
-            <Section title="Your Favorites" icon={Heart} action={<Button size="sm" variant="ghost" to="/favorites" icon={<ArrowRight size={14}/>}>View All</Button>}>
-              {favorites.length === 0 ? (
-                <Card className="p-8 text-center">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">You haven't added any favorites yet. Browse pets and tap the heart to save them.</p>
-                  <div className="mt-4"><Button to="/" size="sm">Browse Pets</Button></div>
-                </Card>
-              ) : (
-                <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {favorites.slice(0,8).map(p => <PetCard key={p._id} pet={p} showAdoptButton />)}
-                </div>
-              )}
-            </Section>
-
-            {/* My Listings */}
-            <Section title="My Listings" icon={PawPrint} action={<Button size="sm" variant="ghost" to="/post-pet" icon={<PlusCircle size={14}/>}>Add New</Button>}>
-              {posted.length === 0 ? (
-                <Card className="p-8 text-center">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">You haven't posted any pets yet.</p>
-                  <Button to="/post-pet" size="sm" icon={<PlusCircle size={14}/>}>Post Your First Pet</Button>
-                </Card>
-              ) : (
-                <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {posted.slice(0,8).map(p => <PetCard key={p._id} pet={p} showAdoptButton />)}
-                </div>
-              )}
-            </Section>
-
-            {/* My Adoptions */}
-            <Section title="My Adoptions" icon={Clock} action={<Button size="sm" variant="ghost" onClick={()=>wrap('adopted', async ()=>{ const res = await API.get('/pets/user/adopted'); setAdopted(res.data||[]); })} loading={loadingMap.adopted}>Refresh</Button>}>
-              {adopted.length === 0 ? (
-                <Card className="p-8 text-center">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">You haven't adopted any pets yet.</p>
-                  <Button to="/" size="sm">Find a Pet</Button>
-                </Card>
-              ) : (
-                <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {adopted.slice(0,8).map(p => <PetCard key={p._id} pet={p} showAdoptButton={false} />)}
-                </div>
-              )}
-            </Section>
-
-            {/* Nearby */}
-            {nearby.length > 0 && (
-              <Section title="Nearby Pets" icon={Compass} action={<Button size="sm" variant="ghost" onClick={loadNearby} loading={loadingMap.nearby}>Refresh</Button>}>
-                <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {nearby.slice(0,8).map(p => <PetCard key={p._id} pet={p} showAdoptButton />)}
-                </div>
-              </Section>
-            )}
-
-            {/* Insights */}
-            {insights && (
-              <Section title="Adoption Insights" icon={ListChecks} action={<Button size="sm" variant="ghost" onClick={()=>wrap('insights', async ()=>{ const res = await API.get('/pets/insights'); setInsights(res.data); })} loading={loadingMap.insights}>Refresh</Button>}>
-                <div className="grid gap-5 md:grid-cols-3">
-                  <Card className="p-5 space-y-3">
-                    <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400"><Clock size={14}/> <span>Avg Adoption Time</span></div>
-                    <p className="text-2xl font-semibold text-gray-900 dark:text-white">{insights.averageAdoptionDuration ? `${Math.round(insights.averageAdoptionDuration / (1000*60*60*24))}d` : '—'}</p>
-                  </Card>
-                  <Card className="p-5 space-y-3">
-                    <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400"><Flame size={14}/> <span>Total Adoptions</span></div>
-                    <p className="text-2xl font-semibold text-gray-900 dark:text-white">{insights.adoptedCount}</p>
-                  </Card>
-                  <Card className="p-5 space-y-3">
-                    <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400"><Trophy size={14}/> <span>Fastest Adoption</span></div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{insights.fastestAdoption ? `${insights.fastestAdoption.name} • ${Math.round(insights.fastestAdoption.adoptionDuration/(1000*60*60*24))}d` : '—'}</p>
-                  </Card>
-                </div>
-                {insights.topBreeds?.length > 0 && (
-                  <div className="mt-5">
-                    <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2 flex items-center space-x-2"><Globe2 size={12}/> <span>Popular Breeds</span></p>
-                    <div className="flex flex-wrap gap-2">
-                      {insights.topBreeds.map(b => (
-                        <span key={b._id} className="px-2 py-1 rounded-full text-xs bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-800">{b._id} <span className="font-semibold">{b.count}</span></span>
-                      ))}
+            {/* Tab Content */}
+            {activeTab === 'overview' && (
+              <>
+                {/* Recommended */}
+                {recommended.length > 0 && (
+                  <Section title="Recommended For You" icon={Star} action={<Button size="sm" variant="ghost" onClick={()=>wrap('rec', async ()=>{ const res = await API.get('/pets/recommended'); setRecommended(res.data||[]); })} loading={loadingMap.rec}>Refresh</Button>}>
+                    <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                      {recommended.slice(0,8).map(p => <PetCard key={p._id} pet={p} showAdoptButton />)}
                     </div>
-                  </div>
+                  </Section>
                 )}
+
+                {/* Favorites */}
+                <Section title="Your Favorites" icon={Heart} action={<Button size="sm" variant="ghost" to="/favorites" icon={<ArrowRight size={14}/>}>View All</Button>}>
+                  {favorites.length === 0 ? (
+                    <Card className="p-8 text-center">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">You haven't added any favorites yet. Browse pets and tap the heart to save them.</p>
+                      <div className="mt-4"><Button to="/" size="sm">Browse Pets</Button></div>
+                    </Card>
+                  ) : (
+                    <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                      {favorites.slice(0,8).map(p => <PetCard key={p._id} pet={p} showAdoptButton />)}
+                    </div>
+                  )}
+                </Section>
+              </>
+            )}
+
+            {activeTab === 'groups' && <MyGroups />}
+
+            {activeTab === 'pets' && (
+              <>
+                {/* My Listings */}
+                <Section title="My Listings" icon={PawPrint} action={<Button size="sm" variant="ghost" to="/post-pet" icon={<PlusCircle size={14}/>}>Add New</Button>}>
+                  {posted.length === 0 ? (
+                    <Card className="p-8 text-center">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">You haven't posted any pets yet.</p>
+                      <Button to="/post-pet" size="sm" icon={<PlusCircle size={14}/>}>Post Your First Pet</Button>
+                    </Card>
+                  ) : (
+                    <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                      {posted.slice(0,8).map(p => <PetCard key={p._id} pet={p} showAdoptButton />)}
+                    </div>
+                  )}
+                </Section>
+
+                {/* My Adoptions */}
+                <Section title="My Adoptions" icon={Clock}>
+                  {adopted.length === 0 ? (
+                    <Card className="p-8 text-center">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">You haven't adopted any pets yet.</p>
+                      <Button to="/" size="sm">Find a Pet</Button>
+                    </Card>
+                  ) : (
+                    <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                      {adopted.slice(0,8).map(p => <PetCard key={p._id} pet={p} showAdoptButton={false} />)}
+                    </div>
+                  )}
+                </Section>
+              </>
+            )}
+
+            {activeTab === 'activity' && (
+              <Section title="Recent Activity" icon={Clock}>
+                <Card className="p-8 text-center">
+                  <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    Activity Feed Coming Soon
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    We're working on bringing you a comprehensive activity feed to track all your interactions.
+                  </p>
+                </Card>
               </Section>
             )}
 
-            {/* Call to action */}
-            <div className="mt-20">
-              <div className="relative overflow-hidden rounded-2xl border border-primary-200 dark:border-primary-900/40 bg-gradient-to-br from-primary-600 via-primary-500 to-secondary-500 p-8 md:p-10 text-white flex flex-col md:flex-row items-start md:items-center gap-8 shadow-xl">
-                <div className="flex-1">
-                  <h3 className="text-2xl md:text-3xl font-extrabold mb-3 leading-tight">Ready to Help Another Pet?</h3>
-                  <p className="text-white/90 text-sm md:text-base max-w-2xl leading-relaxed">Post a new listing or keep exploring recommendations. Every interaction improves the matching intelligence.</p>
+            {/* CTA */}
+            {activeTab === 'overview' && (
+              <div className="mt-16">
+                <div className="relative overflow-hidden rounded-2xl border border-primary-200 dark:border-primary-900/40 bg-gradient-to-br from-primary-600 via-primary-500 to-secondary-500 p-8 md:p-10 text-white flex flex-col md:flex-row items-start md:items-center gap-8 shadow-xl">
+                  <div className="flex-1">
+                    <h3 className="text-2xl md:text-3xl font-extrabold mb-3 leading-tight">Ready to Help Another Pet?</h3>
+                    <p className="text-white/90 text-sm md:text-base max-w-2xl leading-relaxed">Post a new listing or keep exploring recommendations. Every interaction improves the matching intelligence.</p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <Button to="/post-pet" size="lg" variant="secondary" icon={<PlusCircle size={18}/>}>Post a Pet</Button>
+                    <Button to="/" size="lg" className="bg-white text-primary-600 hover:bg-white/90" icon={<PawPrint size={18}/>}>Browse More</Button>
+                  </div>
+                  <div className="absolute -right-10 -bottom-10 w-72 h-72 bg-white/20 rounded-full blur-2xl pointer-events-none" />
                 </div>
-                <div className="flex items-center gap-4">
-                  <Button to="/post-pet" size="lg" variant="secondary" icon={<PlusCircle size={18}/>}>Post a Pet</Button>
-                  <Button to="/" size="lg" className="bg-white text-primary-600 hover:bg-white/90" icon={<PawPrint size={18}/>}>Browse More</Button>
-                </div>
-                <div className="absolute -right-10 -bottom-10 w-72 h-72 bg-white/20 rounded-full blur-2xl pointer-events-none" />
               </div>
-            </div>
+            )}
           </>
         )}
       </div>

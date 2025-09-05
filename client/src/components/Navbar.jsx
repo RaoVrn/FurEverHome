@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Heart, User, PlusCircle, Settings, LogOut, Moon, Sun, Home, Star, HelpCircle, Bell } from 'lucide-react';
+import { Menu, X, Heart, User, Users, PlusCircle, Settings, LogOut, Moon, Sun, Home, Star, HelpCircle, Bell } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import Button from './ui/Button';
@@ -24,6 +24,7 @@ const Navbar = () => {
   const navLinks = [
     { path: '/', label: 'Home', icon: Heart, publicOnly: true },
     { path: '/dashboard', label: 'Dashboard', icon: User, authRequired: true },
+    { path: '/groups', label: 'Groups', icon: Users, authRequired: true },
     { path: '/favorites', label: 'Favorites', icon: Heart, authRequired: true },
     { path: '/post-pet', label: 'Post Pet', icon: PlusCircle, authRequired: true },
     ...(isAdmin ? [{ path: '/admin', label: 'Admin', icon: Settings }] : [])
