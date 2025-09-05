@@ -118,10 +118,11 @@ const PetCard = ({ pet, onAdopt, onLike, showOwnerActions = false, showAdoptButt
   }, [pet.primaryImage, pet.photos, pet.image, pet.images]);
 
   return (
-    <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
+    <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden rounded-xl border-0 shadow-md">
       <Link to={`/pets/${pet._id}`} className="block">
         <div className="relative">
-          <div className="w-full h-48 bg-gray-100 dark:bg-gray-700 overflow-hidden">
+          {/* Media area - reduced height */}
+          <div className="w-full h-36 bg-gray-100 dark:bg-gray-700 overflow-hidden rounded-t-xl">
             <img
               src={primaryImage}
               alt={`${pet.name} the ${pet.breed}`}
@@ -132,12 +133,12 @@ const PetCard = ({ pet, onAdopt, onLike, showOwnerActions = false, showAdoptButt
           </div>
           
           {/* Overlay badges */}
-          <div className="absolute top-2 left-2 flex flex-col space-y-2">
-            <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getUrgencyColor(pet.urgency)}`}>
+          <div className="absolute top-3 left-3 flex flex-col space-y-2">
+            <span className={`px-2.5 py-1 rounded-full text-xs font-medium border shadow-sm ${getUrgencyColor(pet.urgency)}`}>
               {pet.urgency?.charAt(0).toUpperCase() + pet.urgency?.slice(1)} Priority
             </span>
             {pet.vaccinated && (
-              <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+              <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200 shadow-sm">
                 Vaccinated
               </span>
             )}
@@ -146,18 +147,18 @@ const PetCard = ({ pet, onAdopt, onLike, showOwnerActions = false, showAdoptButt
           {/* Like button */}
           <button
             onClick={handleLike}
-            className={`absolute top-2 right-2 p-2 rounded-full transition-colors duration-200 ${
+            className={`absolute top-3 right-3 p-2.5 rounded-full transition-all duration-200 shadow-lg ${
               isLiked 
-                ? 'bg-red-500 text-white' 
-                : 'bg-white/80 text-gray-600 hover:bg-red-500 hover:text-white'
+                ? 'bg-red-500 text-white shadow-red-200' 
+                : 'bg-white/90 backdrop-blur text-gray-600 hover:bg-red-500 hover:text-white hover:shadow-red-200'
             }`}
           >
             <Heart size={16} fill={isLiked ? 'currentColor' : 'none'} />
           </button>
 
           {/* Views count */}
-          <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded-full text-xs flex items-center space-x-1">
-            <Eye size={12} />
+          <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur text-white px-2.5 py-1 rounded-full text-xs flex items-center space-x-1.5 shadow-sm">
+            <Eye size={14} />
             <span>{pet.views || 0}</span>
           </div>
         </div>
@@ -165,10 +166,10 @@ const PetCard = ({ pet, onAdopt, onLike, showOwnerActions = false, showAdoptButt
         <div className="p-4">
           {/* Pet name and category */}
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 transition-colors">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 transition-colors leading-tight truncate pr-2">
               {pet.name} {getCategoryEmoji(pet.category)}
             </h3>
-            <span className="text-sm text-gray-500 dark:text-gray-400 capitalize">
+            <span className="text-sm text-gray-500 dark:text-gray-400 capitalize font-medium">
               {pet.gender}
             </span>
           </div>
@@ -176,7 +177,7 @@ const PetCard = ({ pet, onAdopt, onLike, showOwnerActions = false, showAdoptButt
           {/* Pet details */}
           <div className="space-y-1 mb-3">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              <span className="font-medium">{pet.breed}</span> • {pet.age} years old
+              <span className="font-medium">{pet.breed}</span> • {pet.age} {pet.age === 1 ? 'year' : 'years'} old
             </p>
             {pet.size && (
               <p className="text-sm text-gray-600 dark:text-gray-400 capitalize">
@@ -186,24 +187,24 @@ const PetCard = ({ pet, onAdopt, onLike, showOwnerActions = false, showAdoptButt
           </div>
 
           {/* Description */}
-          <p className="text-sm text-gray-700 dark:text-gray-300 mb-3 line-clamp-2">
+          <p className="text-sm text-gray-700 dark:text-gray-300 mb-3 line-clamp-2 leading-relaxed">
             {pet.description}
           </p>
 
           {/* Location and posted by */}
-          <div className="space-y-1 mb-4">
+          <div className="space-y-1 mb-3">
             {pet.location && (
               <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                <MapPin size={14} className="mr-1" />
-                <span>{pet.location}</span>
+                <MapPin size={14} className="mr-1.5 flex-shrink-0" />
+                <span className="truncate">{pet.location}</span>
               </div>
             )}
             <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-              <User size={14} className="mr-1" />
-              <span>Posted by {pet.postedBy?.name}</span>
+              <User size={14} className="mr-1.5 flex-shrink-0" />
+              <span className="truncate">Posted by {pet.postedBy?.name}</span>
             </div>
             <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-              <Calendar size={14} className="mr-1" />
+              <Calendar size={14} className="mr-1.5 flex-shrink-0" />
               <span>{new Date(pet.createdAt).toLocaleDateString()}</span>
             </div>
           </div>
@@ -225,7 +226,7 @@ const PetCard = ({ pet, onAdopt, onLike, showOwnerActions = false, showAdoptButt
           )}
 
           {/* Action buttons */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
             <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
               <Heart size={14} />
               <span>{likeCount} likes</span>

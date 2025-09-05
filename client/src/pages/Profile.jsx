@@ -361,7 +361,7 @@ const Profile = () => {
                 </Button>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredPosted.map((pet) => (
                   <PetCard
                     key={pet._id}
@@ -392,7 +392,7 @@ const Profile = () => {
                 </Button>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {adoptedPets.map((pet) => (
                   <PetCard
                     key={pet._id}
@@ -420,7 +420,7 @@ const Profile = () => {
                 </Button>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {favoritePets.map((pet) => (
                   <PetCard
                     key={pet._id}

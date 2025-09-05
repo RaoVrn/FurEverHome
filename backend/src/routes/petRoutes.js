@@ -33,6 +33,27 @@ router.get('/trending', require('../controllers/petFeatures').getTrendingPets);
 router.get('/insights', require('../controllers/petFeatures').getAdoptionInsights);
 
 const Pet = require('../models/Pet');
+const User = require('../models/User');
+
+// Global platform stats (pets/users/adoptions) - lightweight aggregate for About page
+router.get('/platform/stats', async (req, res, next) => {
+  try {
+    const [totalPets, totalUsers, adoptedCount] = await Promise.all([
+      Pet.countDocuments({}),
+      User.countDocuments({ isActive: true }),
+      Pet.countDocuments({ status: 'adopted' })
+    ]);
+
+    res.json({
+      pets: totalPets,
+      users: totalUsers,
+      adoptions: adoptedCount,
+      launchYear: 2025 // keep a single source of truth
+    });
+  } catch (err) {
+    next(err);
+  }
+});
 
 // Get user's posted pets
 router.get('/user/posted', authMiddleware, async (req, res, next) => {

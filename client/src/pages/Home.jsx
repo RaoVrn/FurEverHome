@@ -648,7 +648,7 @@ const Home = () => {
         {recommended?.length > 0 && (
           <div className="mb-10">
             <SectionHeader title="Recommended For You" icon={Star} action={<Button variant="ghost" size="sm" onClick={loadRecommended} loading={loadingExtra.recommended}>Refresh</Button>} />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {recommended.map(p => <PetCard key={p._id} pet={p} showAdoptButton />)}
             </div>
           </div>

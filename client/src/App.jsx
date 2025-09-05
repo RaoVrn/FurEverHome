@@ -19,6 +19,11 @@ import PetDetails from './pages/PetDetails';
 import Profile from './pages/Profile';
 import EditPet from './pages/EditPet';
 import Favorites from './pages/Favorites';
+import Help from './pages/Help';
+import About from './pages/About';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
+import Community from './pages/Community';
 
 // Protected Route Component with admin redirection logic
 const ProtectedRoute = ({ element, adminOnly = false, path }) => {
@@ -73,6 +78,26 @@ const App = () => {
                   <Route 
                     path="/edit-pet/:id" 
                     element={<ProtectedRoute element={<EditPet />} />} 
+                  />
+                  <Route 
+                    path="/help" 
+                    element={<ProtectedRoute element={<Help />} />} 
+                  />
+                  <Route 
+                    path="/about" 
+                    element={<About />} 
+                  />
+                  <Route 
+                    path="/privacy" 
+                    element={<Privacy />} 
+                  />
+                  <Route 
+                    path="/terms" 
+                    element={<Terms />} 
+                  />
+                  <Route 
+                    path="/community" 
+                    element={<Community />} 
                   />
                   <Route 
                     path="/admin" 

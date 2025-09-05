@@ -27,7 +27,7 @@ FurEverHome is a comprehensive pet adoption platform designed to streamline the 
 ### ✨ Key Highlights
 
 - 🏠 **Dual Listing Types**: Support for both owned pet rehoming and stray animal rescue
-- 💰 **Multi-Currency Support**: Global reach with support for USD, EUR, GBP, INR, AUD, CAD, JPY
+- 💰 **Multi-Currency Support**: Global reach with support for USD, EUR, GBP, INR, AUD, CAD, JPY, CNY, BRL, MXN, ZAR, SGD, HKD, CHF, SEK, NOK, DKK, PLN, CZK, HUF, RUB, TRY, KRW, THB, PHP, MYR, IDR, VND
 - 🎯 **Smart Matching**: Advanced filtering and search capabilities
 - 📱 **Responsive Design**: Beautiful, mobile-first interface
 - 🔐 **Secure Authentication**: JWT-based user management
@@ -91,7 +91,7 @@ graph TB
 - **Dynamic Form Fields**: Context-aware forms that adapt based on listing type
 
 ### 💳 Global Currency Support
-- **Multi-Currency Adoption Fees**: USD, EUR, GBP, INR, AUD, CAD, JPY
+- **Multi-Currency Adoption Fees**: USD, EUR, GBP, INR, AUD, CAD, JPY, CNY, BRL, MXN, ZAR, SGD, HKD, CHF, SEK, NOK, DKK, PLN, CZK, HUF, RUB, TRY, KRW, THB, PHP, MYR, IDR, VND
 - **Automatic Free Adoption**: Stray animals automatically set to free
 - **Currency Display**: Consistent formatting across all interfaces
 

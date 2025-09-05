@@ -5,6 +5,7 @@ import { Upload, X, Plus, Heart, Camera, Info, ArrowLeft, ArrowRight, Recycle, P
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Card from '../components/ui/Card';
+import SearchableSelect from '../components/ui/SearchableSelect';
 import API from '../utils/api';
 import toast from 'react-hot-toast';
 
@@ -42,7 +43,27 @@ const PostPet = () => {
 
   const originType = watch('originType');
   const currency = watch('currency');
-  const currencyOptions = ['USD','EUR','GBP','INR','AUD','CAD','JPY'];
+  const currencyOptions = [
+    'USD','EUR','GBP','INR','AUD','CAD','JPY','CNY','BRL','MXN',
+    'ZAR','SGD','HKD','CHF','SEK','NOK','DKK','PLN','CZK','HUF',
+    'RUB','TRY','KRW','THB','PHP','MYR','IDR','VND'
+  ];
+
+  // Helper function to get currency names
+  const getCurrencyName = (code) => {
+    const currencyNames = {
+      'USD': 'US Dollar', 'EUR': 'Euro', 'GBP': 'British Pound', 'INR': 'Indian Rupee',
+      'AUD': 'Australian Dollar', 'CAD': 'Canadian Dollar', 'JPY': 'Japanese Yen',
+      'CNY': 'Chinese Yuan', 'BRL': 'Brazilian Real', 'MXN': 'Mexican Peso',
+      'ZAR': 'South African Rand', 'SGD': 'Singapore Dollar', 'HKD': 'Hong Kong Dollar',
+      'CHF': 'Swiss Franc', 'SEK': 'Swedish Krona', 'NOK': 'Norwegian Krone',
+      'DKK': 'Danish Krone', 'PLN': 'Polish Złoty', 'CZK': 'Czech Koruna',
+      'HUF': 'Hungarian Forint', 'RUB': 'Russian Ruble', 'TRY': 'Turkish Lira',
+      'KRW': 'South Korean Won', 'THB': 'Thai Baht', 'PHP': 'Philippine Peso',
+      'MYR': 'Malaysian Ringgit', 'IDR': 'Indonesian Rupiah', 'VND': 'Vietnamese Dong'
+    };
+    return currencyNames[code] || code;
+  };
 
   const categories = [
     { value: 'dog', label: 'Dog 🐕', emoji: '🐕' },
@@ -529,40 +550,46 @@ const PostPet = () => {
                 {...register('contactEmail')}
               />
 
-              {/* Currency & Adoption Fee (disabled for stray) */}
-              <div className="flex flex-col md:flex-row gap-3 md:items-end md:col-span-2">
-                <div className="w-full md:w-40">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Currency</label>
-                  <select
-                    disabled={originType==='stray'}
-                    className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${originType==='stray' ? 'opacity-60 cursor-not-allowed':''}`}
-                    {...register('currency')}
-                  >
-                    {currencyOptions.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-                <div className="flex-1">
-                  <Input
-                    label={`Adoption Fee ${originType==='stray' ? '(Free for Stray)' : `(${currency})`}`}
-                    type="number"
-                    placeholder="0"
-                    disabled={originType==='stray'}
-                    {...register('adoptionFee')}
-                  />
-                </div>
-                {originType==='stray' && (
-                  <div className="flex items-center text-sm font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg px-4 py-2 border border-emerald-200 dark:border-emerald-800/50">
-                    Free Adoption
-                  </div>
-                )}
-              </div>
-
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Urgency Level</label>
                 <select className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" {...register('urgency')}>
                   {urgencyLevels.map(level => (<option key={level.value} value={level.value}>{level.label}</option>))}
                 </select>
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">High priority listings surface higher in search and recommendation modules.</p>
+              </div>
+
+              {/* Currency & Adoption Fee Section */}
+              <div className="md:col-span-2">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <SearchableSelect
+                      label="Currency"
+                      options={currencyOptions.map(code => ({ 
+                        value: code, 
+                        label: `${code} - ${getCurrencyName(code)}` 
+                      }))}
+                      value={currency}
+                      onChange={(value) => setValue('currency', value)}
+                      disabled={originType === 'stray'}
+                      placeholder="Select currency"
+                      searchPlaceholder="Search currencies..."
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Input
+                      label={`Adoption Fee ${originType === 'stray' ? '(Free for Stray)' : `(${currency})`}`}
+                      type="number"
+                      placeholder="0"
+                      disabled={originType === 'stray'}
+                      {...register('adoptionFee')}
+                    />
+                  </div>
+                </div>
+                {originType === 'stray' && (
+                  <div className="mt-3 flex items-center text-sm font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg px-4 py-2 border border-emerald-200 dark:border-emerald-800/50">
+                    🆓 Free Adoption - Stray animals are always free to adopt
+                  </div>
+                )}
               </div>
             </div>
           </Card>

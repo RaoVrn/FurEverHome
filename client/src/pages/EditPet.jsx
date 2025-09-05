@@ -5,6 +5,7 @@ import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
 import Loading from '../components/ui/Loading';
+import SearchableSelect from '../components/ui/SearchableSelect';
 import { useAuth } from '../contexts/AuthContext';
 import API from '../utils/api';
 import toast from 'react-hot-toast';
@@ -15,6 +16,29 @@ const EditPet = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+
+  // Helper function to get currency names
+  const getCurrencyName = (code) => {
+    const currencyNames = {
+      'USD': 'US Dollar', 'EUR': 'Euro', 'GBP': 'British Pound', 'INR': 'Indian Rupee',
+      'AUD': 'Australian Dollar', 'CAD': 'Canadian Dollar', 'JPY': 'Japanese Yen',
+      'CNY': 'Chinese Yuan', 'BRL': 'Brazilian Real', 'MXN': 'Mexican Peso',
+      'ZAR': 'South African Rand', 'SGD': 'Singapore Dollar', 'HKD': 'Hong Kong Dollar',
+      'CHF': 'Swiss Franc', 'SEK': 'Swedish Krona', 'NOK': 'Norwegian Krone',
+      'DKK': 'Danish Krone', 'PLN': 'Polish Złoty', 'CZK': 'Czech Koruna',
+      'HUF': 'Hungarian Forint', 'RUB': 'Russian Ruble', 'TRY': 'Turkish Lira',
+      'KRW': 'South Korean Won', 'THB': 'Thai Baht', 'PHP': 'Philippine Peso',
+      'MYR': 'Malaysian Ringgit', 'IDR': 'Indonesian Rupiah', 'VND': 'Vietnamese Dong'
+    };
+    return currencyNames[code] || code;
+  };
+
+  const currencyOptions = [
+    'USD','EUR','GBP','INR','AUD','CAD','JPY','CNY','BRL','MXN',
+    'ZAR','SGD','HKD','CHF','SEK','NOK','DKK','PLN','CZK','HUF',
+    'RUB','TRY','KRW','THB','PHP','MYR','IDR','VND'
+  ];
+
   const [formData, setFormData] = useState({
     name: '',
     age: '',
@@ -339,16 +363,18 @@ const EditPet = () => {
               </div>
               <div className="grid grid-cols-5 gap-2 md:col-span-2">
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Currency</label>
-                  <select
-                    name="currency"
+                  <SearchableSelect
+                    label="Currency"
+                    options={currencyOptions.map(code => ({ 
+                      value: code, 
+                      label: `${code} - ${getCurrencyName(code)}` 
+                    }))}
                     value={formData.currency}
-                    onChange={handleInputChange}
-                    disabled={formData.originType==='stray'}
-                    className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white ${formData.originType==='stray' ? 'opacity-60 cursor-not-allowed':''}`}
-                  >
-                    {['USD','EUR','GBP','INR','AUD','CAD','JPY'].map(c=> <option key={c} value={c}>{c}</option>)}
-                  </select>
+                    onChange={(value) => setFormData(prev => ({ ...prev, currency: value }))}
+                    disabled={formData.originType === 'stray'}
+                    placeholder="Select currency"
+                    searchPlaceholder="Search currencies..."
+                  />
                 </div>
                 <div className="col-span-3">
                   <Input

@@ -119,7 +119,7 @@ const UserDashboard = () => {
             {/* Recommended */}
             {recommended.length > 0 && (
               <Section title="Recommended For You" icon={Star} action={<Button size="sm" variant="ghost" onClick={()=>wrap('rec', async ()=>{ const res = await API.get('/pets/recommended'); setRecommended(res.data||[]); })} loading={loadingMap.rec}>Refresh</Button>}>
-                <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {recommended.slice(0,8).map(p => <PetCard key={p._id} pet={p} showAdoptButton />)}
                 </div>
               </Section>
@@ -133,7 +133,7 @@ const UserDashboard = () => {
                   <div className="mt-4"><Button to="/" size="sm">Browse Pets</Button></div>
                 </Card>
               ) : (
-                <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {favorites.slice(0,8).map(p => <PetCard key={p._id} pet={p} showAdoptButton />)}
                 </div>
               )}
@@ -147,7 +147,7 @@ const UserDashboard = () => {
                   <Button to="/post-pet" size="sm" icon={<PlusCircle size={14}/>}>Post Your First Pet</Button>
                 </Card>
               ) : (
-                <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {posted.slice(0,8).map(p => <PetCard key={p._id} pet={p} showAdoptButton />)}
                 </div>
               )}
@@ -161,7 +161,7 @@ const UserDashboard = () => {
                   <Button to="/" size="sm">Find a Pet</Button>
                 </Card>
               ) : (
-                <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {adopted.slice(0,8).map(p => <PetCard key={p._id} pet={p} showAdoptButton={false} />)}
                 </div>
               )}
@@ -170,7 +170,7 @@ const UserDashboard = () => {
             {/* Nearby */}
             {nearby.length > 0 && (
               <Section title="Nearby Pets" icon={Compass} action={<Button size="sm" variant="ghost" onClick={loadNearby} loading={loadingMap.nearby}>Refresh</Button>}>
-                <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {nearby.slice(0,8).map(p => <PetCard key={p._id} pet={p} showAdoptButton />)}
                 </div>
               </Section>

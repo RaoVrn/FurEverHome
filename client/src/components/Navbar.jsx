@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Heart, User, PlusCircle, Settings, LogOut, Moon, Sun } from 'lucide-react';
+import { Menu, X, Heart, User, PlusCircle, Settings, LogOut, Moon, Sun, Home, Star, HelpCircle, Bell } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import Button from './ui/Button';
@@ -93,6 +93,16 @@ const Navbar = () => {
                 {showUserMenu && (
                   <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 border border-gray-200 dark:border-gray-700">
                     <Link
+                      to="/dashboard"
+                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <Home size={16} />
+                        <span>Dashboard</span>
+                      </div>
+                    </Link>
+                    <Link
                       to="/profile"
                       className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                       onClick={() => setShowUserMenu(false)}
@@ -100,6 +110,60 @@ const Navbar = () => {
                       <div className="flex items-center space-x-2">
                         <User size={16} />
                         <span>Profile</span>
+                      </div>
+                    </Link>
+                    <Link
+                      to="/favorites"
+                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <Star size={16} />
+                        <span>Favorites</span>
+                      </div>
+                    </Link>
+                    <Link
+                      to="/post-pet"
+                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <PlusCircle size={16} />
+                        <span>Post Pet</span>
+                      </div>
+                    </Link>
+                    <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+                    <button
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        // Add notification toggle logic here
+                      }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <Bell size={16} />
+                        <span>Notifications</span>
+                      </div>
+                    </button>
+                    <Link
+                      to="/help"
+                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <HelpCircle size={16} />
+                        <span>Help & Support</span>
+                      </div>
+                    </Link>
+                    <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+                    <Link
+                      to="/profile"
+                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <Settings size={16} />
+                        <span>Account Settings</span>
                       </div>
                     </Link>
                     <button
@@ -173,12 +237,64 @@ const Navbar = () => {
               {isAuthenticated ? (
                 <div className="space-y-1">
                   <Link
+                    to="/dashboard"
+                    className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Home size={18} />
+                    <span>Dashboard</span>
+                  </Link>
+                  <Link
                     to="/profile"
                     className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 hover:bg-gray-50 dark:hover:bg-gray-800"
                     onClick={() => setIsOpen(false)}
                   >
                     <User size={18} />
                     <span>Profile</span>
+                  </Link>
+                  <Link
+                    to="/favorites"
+                    className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Star size={18} />
+                    <span>Favorites</span>
+                  </Link>
+                  <Link
+                    to="/post-pet"
+                    className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <PlusCircle size={18} />
+                    <span>Post Pet</span>
+                  </Link>
+                  <div className="border-t border-gray-200 dark:border-gray-600 my-2"></div>
+                  <button
+                    onClick={() => {
+                      setIsOpen(false);
+                      // Add notification toggle logic here
+                    }}
+                    className="flex items-center space-x-2 w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  >
+                    <Bell size={18} />
+                    <span>Notifications</span>
+                  </button>
+                  <Link
+                    to="/help"
+                    className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <HelpCircle size={18} />
+                    <span>Help & Support</span>
+                  </Link>
+                  <div className="border-t border-gray-200 dark:border-gray-600 my-2"></div>
+                  <Link
+                    to="/profile"
+                    className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Settings size={18} />
+                    <span>Account Settings</span>
                   </Link>
                   <button
                     onClick={() => {
