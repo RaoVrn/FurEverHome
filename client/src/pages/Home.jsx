@@ -257,12 +257,6 @@ const Home = () => {
 
   // Get unique pets for main grid (excluding those in featured sections)
   const uniqueMainPets = useMemo(() => {
-    // If no featured sections have content, show all pets
-    const hasFeaturedContent = (trending?.length > 0) || (recommended?.length > 0);
-    if (!hasFeaturedContent) {
-      return filteredPets;
-    }
-    
     const featuredIds = new Set([
       ...(trending?.map(p => p._id) || []),
       ...(recommended?.map(p => p._id) || []),
@@ -349,8 +343,6 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900">
-      {/* Top anchor for smooth scroll */}
-      <div id="top" className="h-0 w-0 overflow-hidden" />
       {/* HERO / PRODUCT POSITIONING */}
       <div className="relative overflow-hidden">
   <div className="absolute inset-0 bg-gradient-to-br from-primary-700 via-primary-600 to-secondary-600" />
@@ -781,60 +773,55 @@ const Home = () => {
             </div>
           </div>
         )}
-
-        {/* Pet Grid */}
-        <div className="mb-8">
-          {(trending?.length > 0 || recommended?.length > 0) && uniqueMainPets.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
-                <PawPrint size={18} className="mr-2" />
-                More Pets to Discover
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Additional pets that might be perfect for you
-              </p>
-            </div>
-          )}
-          
-          {loading ? (
+  {/* Pet Grid */}
+        {loading ? (
           <div className="flex justify-center py-12">
             <Loading size="lg" text="Loading adorable pets..." />
           </div>
         ) : uniqueMainPets.length === 0 ? (
-          <div className="py-10">
-            <div className="relative max-w-3xl mx-auto overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/70 dark:bg-gray-800/60 backdrop-blur-md p-8">
-              <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_70%_30%,rgba(99,102,241,0.15),transparent_65%)] dark:bg-[radial-gradient(circle_at_70%_30%,rgba(99,102,241,0.25),transparent_65%)]" />
-              <div className="relative text-center">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 text-white shadow-lg">
-                  <Sparkles size={28} />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">You're All Caught Up</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 max-w-xl mx-auto leading-relaxed mb-6">
-                  Every available pet is already highlighted in the featured sections above. Try adjusting or clearing filters, or explore by category to widen your search.
-                </p>
-                <div className="flex flex-wrap justify-center gap-3 mb-6">
-                  <Button variant="outline" size="sm" onClick={clearFilters} icon={<RefreshCcw size={14}/>}>Reset Filters</Button>
-                  <Button variant="outline" size="sm" onClick={()=>window.scrollTo({top:0, behavior:'smooth'})} icon={<ArrowUpRight size={14}/>}>Back to Top</Button>
-                </div>
-                {stats?.categoryDistribution?.length > 1 && (
-                  <div className="mt-2">
-                    <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 font-medium">Quick Categories</p>
-                    <div className="flex flex-wrap justify-center gap-2">
-                      {stats.categoryDistribution.slice(0,8).map(cat => (
-                        <button
-                          key={cat._id+':empty'}
-                          onClick={() => { handleFilterChange('category', cat._id); fetchPets(1); window.scrollTo({top:0, behavior:'smooth'}); }}
-                          className="px-3 py-1.5 text-xs rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition"
-                        >
-                          {cat._id} <span className="text-primary-600 dark:text-primary-400 font-semibold ml-1">{cat.count}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+          <Card className="relative overflow-hidden py-14 px-6 text-center bg-gradient-to-b from-gray-50/40 to-white dark:from-gray-800/40 dark:to-gray-800 border border-dashed border-gray-300 dark:border-gray-600">
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute -top-16 -left-16 w-56 h-56 rounded-full bg-primary-500/5 blur-3xl" />
+              <div className="absolute -bottom-20 -right-20 w-72 h-72 rounded-full bg-secondary-500/5 blur-3xl" />
+            </div>
+            <div className="relative inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-600 to-secondary-600 text-white shadow-lg mb-6">
+              <PawPrint size={32} className="opacity-90" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight">
+              You're All Caught Up
+            </h3>
+            <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 max-w-md mx-auto leading-relaxed mb-6">
+              Every currently available pet is already highlighted above in the featured sections.
+              Try adjusting filters, or check back soon—new rescue friends are added regularly.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              {activeFiltersCount > 0 && (
+                <Button variant="outline" onClick={clearFilters} size="sm">
+                  Clear Filters
+                </Button>
+              )}
+              <Button variant="secondary" size="sm" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                Back to Top
+              </Button>
+              <Button variant="ghost" size="sm" onClick={loadTrending}>
+                Refresh Trending
+              </Button>
+            </div>
+            <div className="mt-8 grid gap-3 sm:grid-cols-3 max-w-lg mx-auto text-left">
+              <div className="p-3 rounded-lg bg-white/70 dark:bg-gray-700/60 backdrop-blur border border-gray-200 dark:border-gray-600">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">Tip</p>
+                <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">Use fewer filters to widen your results.</p>
+              </div>
+              <div className="p-3 rounded-lg bg-white/70 dark:bg-gray-700/60 backdrop-blur border border-gray-200 dark:border-gray-600">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">Stay Updated</p>
+                <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">New pets appear throughout the day.</p>
+              </div>
+              <div className="p-3 rounded-lg bg-white/70 dark:bg-gray-700/60 backdrop-blur border border-gray-200 dark:border-gray-600 sm:col-span-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 font-medium">Action</p>
+                <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">Post a pet to help them find a home.</p>
               </div>
             </div>
-          </div>
+          </Card>
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -860,7 +847,7 @@ const Home = () => {
                   <p className="text-gray-700 dark:text-gray-300 max-w-2xl text-sm md:text-base leading-relaxed">Create an account to like pets, get personalized recommendations, and track your adoption journey. Each adoption opens space for another rescue.</p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Button onClick={()=>window.scrollTo({top:0, behavior:'smooth'})} variant="secondary" size="lg" icon={<ArrowUpRight size={18}/>}>Back to Top</Button>
+                  <Button onClick={()=>document.getElementById('top')?.scrollIntoView({behavior:'smooth'})} variant="secondary" size="lg" icon={<ArrowUpRight size={18}/>}>Back to Top</Button>
                   <Button onClick={()=>window.location.href='/register'} size="lg" icon={<PlusCircle size={18}/>}>Get Started</Button>
                 </div>
                 <div className="absolute -right-10 -bottom-10 w-72 h-72 bg-primary-400/10 dark:bg-primary-600/20 rounded-full blur-3xl pointer-events-none" />
@@ -868,7 +855,6 @@ const Home = () => {
             </div>
           </>
         )}
-        </div>
 
         {/* FAQ SECTION */}
         <SectionWrapper id="faq" className="pt-16 pb-12 border-t border-gray-200 dark:border-gray-800 mt-16">
