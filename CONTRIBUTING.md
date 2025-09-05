@@ -232,7 +232,7 @@ test(pets): add unit tests for pet controller
 - **Discord**: Join our community server (coming soon)
 - **GitHub Discussions**: For general questions and ideas
 - **Issues**: For bug reports and feature requests
-- **Email**: developers@fureverhome.com
+- **Email**: prakash.varun.0305@gmail.com
 
 ## 🏆 Recognition
 
@@ -254,12 +254,5 @@ We pledge to make participation in our project a harassment-free experience for 
 - Showing empathy towards other community members
 
 ### Enforcement
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team at conduct@fureverhome.com.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team at prakash.varun.0305@gmail.com.
 
----
-
-## 🙏 Thank You
-
-Thank you for your interest in contributing to FurEverHome! Every contribution, no matter how small, helps us build a better platform for pets and families worldwide.
-
-**Together, we're making pet adoption easier and more accessible for everyone! 🐾❤️**
