@@ -157,7 +157,7 @@ const Navbar = () => {
                     </Link>
                     <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
                     <Link
-                      to="/profile"
+                      to="/account-settings"
                       className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                       onClick={() => setShowUserMenu(false)}
                     >
@@ -289,7 +289,7 @@ const Navbar = () => {
                   </Link>
                   <div className="border-t border-gray-200 dark:border-gray-600 my-2"></div>
                   <Link
-                    to="/profile"
+                    to="/account-settings"
                     className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 hover:bg-gray-50 dark:hover:bg-gray-800"
                     onClick={() => setIsOpen(false)}
                   >

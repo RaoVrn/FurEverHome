@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Pet = require('../models/Pet');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -98,10 +99,19 @@ const getUserProfile = async (req, res) => {
 // Update user profile
 const updateUserProfile = async (req, res) => {
   try {
-    const { name, phone, location, avatar } = req.body;
+    const { name, email, phone, location, avatar } = req.body;
+    
+    // Check if email is being changed and if it's already taken
+    if (email && email !== req.user.email) {
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({ message: 'Email already in use' });
+      }
+    }
+    
     const user = await User.findByIdAndUpdate(
       req.user._id,
-      { name, phone, location, avatar },
+      { name, email, phone, location, avatar },
       { new: true }
     ).select('-password');
     res.json(user);
@@ -144,4 +154,89 @@ const deleteAccount = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, getUserProfile, updateUserProfile, changePassword, deleteAccount };
+// Get account statistics
+const getAccountStats = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    
+    // Get user's posted pets
+    const postedPets = await Pet.find({ owner: userId });
+    const adoptedPets = postedPets.filter(pet => pet.status === 'adopted');
+    
+    // Get user data for login stats
+    const user = await User.findById(userId);
+    
+    const stats = {
+      totalPetsPosted: postedPets.length,
+      successfulAdoptions: adoptedPets.length,
+      loginCount: user.loginCount || 0,
+      lastLogin: user.lastLogin || null,
+      accountAge: Math.floor((new Date() - new Date(user.createdAt)) / (1000 * 60 * 60 * 24))
+    };
+    
+    res.json(stats);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Update notification settings
+const updateNotificationSettings = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const settings = req.body;
+    
+    await User.findByIdAndUpdate(userId, {
+      notificationSettings: settings
+    });
+    
+    res.json({ message: 'Notification settings updated successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Export user data
+const exportUserData = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    
+    // Get user data
+    const user = await User.findById(userId).select('-password');
+    const pets = await Pet.find({ owner: userId });
+    
+    const exportData = {
+      profile: {
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        location: user.location,
+        createdAt: user.createdAt,
+        role: user.role
+      },
+      pets: pets.map(pet => ({
+        name: pet.name,
+        breed: pet.breed,
+        age: pet.age,
+        description: pet.description,
+        status: pet.status,
+        createdAt: pet.createdAt
+      })),
+      statistics: {
+        totalPetsPosted: pets.length,
+        successfulAdoptions: pets.filter(pet => pet.status === 'adopted').length,
+        loginCount: user.loginCount || 0,
+        lastLogin: user.lastLogin
+      },
+      exportDate: new Date().toISOString()
+    };
+    
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="fureverhome-data-${user.name}-${new Date().toISOString().split('T')[0]}.json"`);
+    res.json(exportData);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+module.exports = { registerUser, loginUser, getUserProfile, updateUserProfile, changePassword, deleteAccount, getAccountStats, updateNotificationSettings, exportUserData };

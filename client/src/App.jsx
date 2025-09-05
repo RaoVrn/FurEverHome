@@ -24,6 +24,7 @@ import About from './pages/About';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import Community from './pages/Community';
+import AccountSettings from './pages/AccountSettings';
 
 // Protected Route Component with admin redirection logic
 const ProtectedRoute = ({ element, adminOnly = false, path }) => {
@@ -98,6 +99,10 @@ const App = () => {
                   <Route 
                     path="/community" 
                     element={<Community />} 
+                  />
+                  <Route 
+                    path="/account-settings" 
+                    element={<ProtectedRoute element={<AccountSettings />} />} 
                   />
                   <Route 
                     path="/admin" 
