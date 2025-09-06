@@ -43,7 +43,7 @@ const Help = () => {
     {
       id: 6,
       question: "How do I report inappropriate content or users?",
-      answer: "If you encounter inappropriate content or suspicious behavior, please contact our support team immediately using the contact form below or email us at prakash.varun.0305@gmail.com. We take all reports seriously and will investigate promptly."
+      answer: "If you encounter inappropriate content or suspicious behavior, please contact our support team immediately using the contact form below or email us at furEverHome@gmail.com. We take all reports seriously and will investigate promptly."
     }
   ];
 
@@ -132,7 +132,7 @@ const Help = () => {
                   <Mail className="h-5 w-5 text-primary-600" />
                   <div>
                     <p className="font-medium text-gray-900 dark:text-white">Email Support</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">prakash.varun.0305@gmail.com</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">furEverHome@gmail.com</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">

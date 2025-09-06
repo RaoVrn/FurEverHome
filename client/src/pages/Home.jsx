@@ -30,12 +30,12 @@ const GradientTitle = ({ icon:Icon, eyebrow, title, highlight, sub }) => (
 
 const ValueGrid = () => {
   const values = [
-    { icon:HandHeart, title:'Mission-Driven Platform', desc:'Built to accelerate safe, ethical pet adoption while empowering rescuers and families with better tools.' },
-    { icon:ShieldCheck, title:'Safety & Verification', desc:'Profiles, activity tracking, moderation signals & fraud-resistant flows reduce risk and build trust.' },
-    { icon:Users, title:'Community Impact', desc:'Every adoption frees space for another rescue. Transparent stats keep impact measurable.' },
-    { icon:Leaf, title:'Sustainable Choice', desc:'Adopting reduces demand for unethical breeding and lowers the environmental pawprint.' },
-    { icon:Brain, title:'Smart Matching', desc:'Behavioral signals, preferences & interaction patterns inform evolving recommendation models.' },
-    { icon:LifeBuoy, title:'Post-Adoption Support', desc:'Guides, care checklists & follow‑ups help each placement succeed long-term.' }
+    { icon:HandHeart, title:'Connect Hearts & Homes', desc:'Find loving pets and caring families through a simple, trusted platform designed for successful matches.' },
+    { icon:ShieldCheck, title:'Verified Listings', desc:'All pets and rescuers are verified to ensure safe, legitimate adoptions with complete health and background information.' },
+    { icon:Users, title:'Strong Community', desc:'Join a supportive community of pet lovers, rescuers, and adopters working together to save lives.' },
+    { icon:Leaf, title:'Save Lives', desc:'Every adoption saves a life and makes room for another rescue. Together we can make a real difference.' },
+    { icon:Brain, title:'Smart Matching', desc:'Our system helps match pets with compatible families based on lifestyle, experience, and preferences.' },
+    { icon:LifeBuoy, title:'Ongoing Support', desc:'Get guidance and support throughout the adoption process and beyond to ensure happy, lasting relationships.' }
   ];
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -59,12 +59,12 @@ const ValueGrid = () => {
 
 const ProcessSteps = () => {
   const steps = [
-    { icon:PawPrint, title:'1. Discover', text:'Filter, search & explore verified pet profiles with health, behavior & compatibility tags.' },
-    { icon:Heart, title:'2. Shortlist', text:'Save favorites & compare temperament, size, energy level and care requirements.' },
-    { icon:Megaphone, title:'3. Apply Securely', text:'Structured adoption intent form reduces friction & surfaces strong matches to rescuers.' },
-    { icon:ShieldCheck, title:'4. Screening', text:'Rescuers review signals & history. In-app messaging streamlines clarifications.' },
-    { icon:CheckCircle2, title:'5. Meet & Confirm', text:'Schedule meetups or virtual intros. Finalize readiness transparently.' },
-    { icon:Sparkles, title:'6. Transition & Support', text:'Post-adoption resources & milestone nudges encourage stable bonding.' }
+    { icon:PawPrint, title:'1. Browse Pets', text:'Explore available pets with detailed profiles, photos, and information about their personality and needs.' },
+    { icon:Heart, title:'2. Find Your Match', text:'Use filters to find pets that match your lifestyle, living situation, and preferences.' },
+    { icon:Megaphone, title:'3. Apply to Adopt', text:'Submit an adoption application with information about your home and experience with pets.' },
+    { icon:ShieldCheck, title:'4. Meet & Greet', text:'Arrange a meeting with the pet and rescue organization to ensure a good fit for everyone.' },
+    { icon:CheckCircle2, title:'5. Complete Adoption', text:'Finalize the adoption process and bring your new family member home!' },
+    { icon:Sparkles, title:'6. Happy Life Together', text:'Enjoy life with your new companion and access ongoing support when needed.' }
   ];
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -85,12 +85,12 @@ const ProcessSteps = () => {
 
 const FAQ = () => {
   const qa = [
-    { q:'What makes this platform different?', a:'It unifies discovery, verification, matching intelligence and post‑adoption continuity into one cohesive workflow.' },
-    { q:'Are pets medically evaluated?', a:'Listings display vaccination, neuter status & any disclosed medical notes. Verification workflows are expanding.' },
-    { q:'Is there a fee?', a:'Most rescues list transparent adoption fees that offset care costs. Platform core browsing is free.' },
-    { q:'How do recommendations work?', a:'Early stage heuristic scoring + preference filters. Roadmap includes adaptive behavioral embeddings.' },
-    { q:'Can I list a pet needing rehoming?', a:'Yes—after creating an account you can post responsibly with required details & follow review guidelines.' },
-    { q:'Do you support shelters?', a:'Shelter org dashboards (beta) aggregate analytics, streamline inquiry triage and amplify visibility.' }
+    { q:'How do I adopt a pet?', a:'Browse our available pets, submit an adoption application for the pet you\'re interested in, and work with the rescue organization to complete the process.' },
+    { q:'Are the pets healthy?', a:'All pets have health information provided by the rescue organization, including vaccination status and any medical needs.' },
+    { q:'Is there an adoption fee?', a:'Most rescues charge an adoption fee to help cover medical care, spaying/neutering, and other costs. Fees vary by organization.' },
+    { q:'Can I return a pet if it doesn\'t work out?', a:'Most rescue organizations have policies about returns. We encourage discussing this during the adoption process.' },
+    { q:'How do I list a pet for adoption?', a:'If you\'re a rescue organization or need to rehome a pet, create an account and follow our listing guidelines.' },
+    { q:'Do you work with shelters?', a:'Yes! We partner with shelters, rescue organizations, and individual rescuers to help pets find loving homes.' }
   ];
   return (
     <div className="grid gap-6 md:grid-cols-2">
@@ -107,24 +107,24 @@ const FAQ = () => {
 const MetricsBand = ({ stats, insights }) => (
   <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
     <div className="p-6 rounded-xl bg-gradient-to-br from-primary-600 to-secondary-600 text-white shadow">
-      <p className="text-xs uppercase tracking-wider opacity-80 mb-1">Platform</p>
+      <p className="text-xs uppercase tracking-wider opacity-80 mb-1">Available</p>
       <p className="text-3xl font-bold">{stats?.totalPets ?? '—'}</p>
-      <p className="text-sm opacity-90">Total Pets Indexed</p>
+      <p className="text-sm opacity-90">Pets Ready for Adoption</p>
     </div>
     <div className="p-6 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-      <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Adoption Rate</p>
-      <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats?.adoptionRate || '—'}</p>
-      <p className="text-sm text-gray-600 dark:text-gray-400">Across active lifecycle</p>
-    </div>
-    <div className="p-6 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-      <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Avg Placement Time</p>
-      <p className="text-3xl font-bold text-gray-900 dark:text-white">{insights?.averageAdoptionDuration ? `${Math.round(insights.averageAdoptionDuration/(1000*60*60*24))}d` : '—'}</p>
-      <p className="text-sm text-gray-600 dark:text-gray-400">From listing to adoption</p>
-    </div>
-    <div className="p-6 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-      <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Engagement</p>
-      <p className="text-3xl font-bold text-gray-900 dark:text-white flex items-center space-x-2"><Star size={20} className="text-primary-500" /><span>{insights?.adoptedCount ?? '—'}</span></p>
+      <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Happy Families</p>
+      <p className="text-3xl font-bold text-gray-900 dark:text-white">{insights?.adoptedCount ?? '—'}</p>
       <p className="text-sm text-gray-600 dark:text-gray-400">Successful Adoptions</p>
+    </div>
+    <div className="p-6 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+      <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Partner Rescues</p>
+      <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats?.categoryDistribution?.length ?? '—'}</p>
+      <p className="text-sm text-gray-600 dark:text-gray-400">Trusted Organizations</p>
+    </div>
+    <div className="p-6 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+      <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Success Rate</p>
+      <p className="text-3xl font-bold text-gray-900 dark:text-white flex items-center space-x-2"><Star size={20} className="text-primary-500" /><span>{stats?.adoptionRate || '—'}</span></p>
+      <p className="text-sm text-gray-600 dark:text-gray-400">Happy Endings</p>
     </div>
   </div>
 );
@@ -352,17 +352,17 @@ const Home = () => {
             <div className="lg:col-span-7 text-white">
               <div className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur px-4 py-1.5 rounded-full text-[13px] mb-6 border border-white/20">
                 <Sparkles size={14} className="text-yellow-300" />
-                <span>Ethical • Data‑Aware • Impact‑Focused</span>
+                <span>Trusted • Verified • Caring</span>
               </div>
               <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-6 tracking-tight">
-                Reimagining <span className="bg-gradient-to-r from-secondary-200 via-primary-100 to-white bg-clip-text text-transparent">Pet Adoption</span> with Intelligence & Care
+                Find Your <span className="bg-gradient-to-r from-secondary-200 via-primary-100 to-white bg-clip-text text-transparent">Perfect Pet</span> Today
               </h1>
               <p className="text-lg md:text-xl text-white/90 leading-relaxed max-w-2xl font-light">
-                FurEverHome connects compassionate adopters and verified rescuers through transparent profiles, smart matching, actionable insights, and long‑term support features—reducing friction and maximizing successful placements.
+                Connect with loving pets waiting for their forever homes. Browse verified listings from trusted rescues and shelters, and find your new best friend.
               </p>
               <div className="mt-8 max-w-xl">
                 <Input
-                  placeholder="Search by name, breed, temperament, or location..."
+                  placeholder="Search by pet name, breed, or location..."
                   value={filters.search}
                   onChange={(e) => handleFilterChange('search', e.target.value)}
                   icon={<Search size={20} />}
@@ -378,19 +378,19 @@ const Home = () => {
               <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-5 text-left">
                 <div>
                   <p className="text-2xl font-bold">{stats?.availablePets ?? '—'}</p>
-                  <p className="text-xs uppercase tracking-wider text-white/70">Available Now</p>
+                  <p className="text-xs uppercase tracking-wider text-white/70">Pets Available</p>
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{insights?.adoptedCount ?? '—'}</p>
-                  <p className="text-xs uppercase tracking-wider text-white/70">Total Placements</p>
+                  <p className="text-xs uppercase tracking-wider text-white/70">Happy Adoptions</p>
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats?.categoryDistribution?.length ?? '—'}</p>
-                  <p className="text-xs uppercase tracking-wider text-white/70">Categories</p>
+                  <p className="text-xs uppercase tracking-wider text-white/70">Rescue Partners</p>
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats?.adoptionRate || '—'}</p>
-                  <p className="text-xs uppercase tracking-wider text-white/70">Adoption Rate</p>
+                  <p className="text-xs uppercase tracking-wider text-white/70">Success Rate</p>
                 </div>
               </div>
             </div>
@@ -398,17 +398,17 @@ const Home = () => {
               <div className="relative h-full">
                 <div className="absolute inset-0 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-xl p-6 flex flex-col justify-between shadow-xl">
                   <div className="space-y-3">
-                    <h3 className="text-white font-semibold text-base flex items-center tracking-wide"><Rocket size={18} className="mr-2 text-primary-200"/>Platform Roadmap</h3>
+                    <h3 className="text-white font-semibold text-base flex items-center tracking-wide"><Rocket size={18} className="mr-2 text-primary-200"/>Why Choose FurEverHome?</h3>
                     <ul className="text-sm text-white/85 space-y-1.5 list-disc list-inside">
-                      <li>Trust & verification scoring layer (Q3)</li>
-                      <li>ML-driven compatibility engine (Q4)</li>
-                      <li>Shelter analytics dashboards</li>
-                      <li>Behavioral enrichment tagging</li>
-                      <li>Internationalization rollout</li>
+                      <li>Verified rescue organizations and pet listings</li>
+                      <li>Easy search and filtering to find your match</li>
+                      <li>Direct communication with rescuers</li>
+                      <li>Support throughout the adoption process</li>
+                      <li>Community of pet lovers helping each other</li>
                     </ul>
                   </div>
                   <div className="mt-4 p-4 rounded-lg bg-white/5 border border-white/10">
-                    <p className="text-xs leading-relaxed text-white/80">Mission: accelerate ethical adoptions with clarity, empathy & intelligent tooling—unlocking better outcomes.</p>
+                    <p className="text-xs leading-relaxed text-white/80">Our mission: Connect loving pets with caring families to create lasting bonds and save lives.</p>
                   </div>
                 </div>
               </div>
@@ -420,19 +420,19 @@ const Home = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" id="discovery">
         {/* PRODUCT VALUE PROPOSITION */}
         <SectionWrapper id="value" className="pt-0 pb-8">
-          <GradientTitle eyebrow="Built for Sustainable Adoption" title="A Platform Designed" highlight="For Outcomes" sub="We combine structured pet data, ethical guidelines, behavioral insights and proactive support to reduce failed placements." />
+          <GradientTitle eyebrow="Why FurEverHome" title="Making Pet Adoption" highlight="Simple & Safe" sub="We connect pets in need with loving families through a trusted platform designed for successful adoptions." />
           <ValueGrid />
         </SectionWrapper>
 
         {/* PROCESS */}
         <SectionWrapper id="process" className="pt-4 pb-8">
-          <GradientTitle eyebrow="Clear Journey" title="How FurEverHome" highlight="Works" sub="Transparent steps empower both adopters and rescuers—reducing friction & misalignment." />
+          <GradientTitle eyebrow="Simple Process" title="How Adoption" highlight="Works" sub="From browsing to bringing your new pet home, we make the process clear and straightforward." />
           <ProcessSteps />
         </SectionWrapper>
 
         {/* METRICS */}
         <SectionWrapper id="metrics" className="pt-4 pb-4">
-          <GradientTitle eyebrow="Live Impact" title="Tracking Real" highlight="Progress" sub="Impact transparency builds trust and informs smarter system improvements." />
+          <GradientTitle eyebrow="Real Impact" title="Making a" highlight="Difference" sub="See how our community is helping pets find loving homes every day." />
           <MetricsBand stats={stats} insights={insights} />
         </SectionWrapper>
   {/* DISCOVERY / FILTER BAR */}
@@ -858,7 +858,7 @@ const Home = () => {
 
         {/* FAQ SECTION */}
         <SectionWrapper id="faq" className="pt-16 pb-12 border-t border-gray-200 dark:border-gray-800 mt-16">
-          <GradientTitle eyebrow="Clarity" title="Frequently Asked" highlight="Questions" sub="Still curious? These cover the fundamentals. We're expanding education resources soon." />
+          <GradientTitle eyebrow="Have Questions?" title="Frequently Asked" highlight="Questions" sub="Find answers to common questions about pet adoption through FurEverHome." />
           <FAQ />
         </SectionWrapper>
 

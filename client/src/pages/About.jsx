@@ -159,29 +159,6 @@ const About = () => {
           </div>
         </div>
 
-        {/* Team Section */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-12">Meet Our Team</h2>
-          <div className="grid gap-8 md:grid-cols-3">
-            {teamMembers.map((member, index) => (
-              <Card key={index} className="p-6 text-center">
-                <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center">
-                  <Users className="h-10 w-10 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">
-                  {member.name}
-                </h3>
-                <div className="text-sm font-medium text-primary-600 dark:text-primary-400 mb-3">
-                  {member.role}
-                </div>
-                <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-                  {member.bio}
-                </p>
-              </Card>
-            ))}
-          </div>
-        </div>
-
         {/* Story Section */}
         <Card className="p-8 bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-gray-800 dark:to-gray-900 border-primary-200 dark:border-gray-700">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Our Story</h2>

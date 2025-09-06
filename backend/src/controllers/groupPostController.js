@@ -7,10 +7,13 @@ exports.createGroupPost = async (req, res, next) => {
   try {
     const { groupId } = req.params;
     const {
-      type, title, content, images, videos, relatedPet,
+      type, title, content, videos, relatedPet,
       location, tags, priority, eventDetails, helpRequest,
       visibility
     } = req.body;
+
+    // Handle uploaded images
+    const images = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
 
     const group = await Group.findById(groupId);
     if (!group || !group.isActive) {
@@ -290,6 +293,9 @@ exports.updatePost = async (req, res, next) => {
     const userId = req.user._id;
     const updates = req.body;
 
+    // Handle uploaded images
+    const uploadedImages = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
+
     const post = await GroupPost.findById(postId);
     if (!post) {
       return res.status(404).json({ message: 'Post not found' });
@@ -307,7 +313,7 @@ exports.updatePost = async (req, res, next) => {
 
     // Allowed fields to update
     const allowedUpdates = [
-      'title', 'content', 'images', 'videos', 'tags',
+      'title', 'content', 'videos', 'tags',
       'priority', 'eventDetails', 'helpRequest'
     ];
 
@@ -316,6 +322,13 @@ exports.updatePost = async (req, res, next) => {
         post[field] = updates[field];
       }
     });
+
+    // Handle images separately - combine existing with new uploads
+    if (uploadedImages.length > 0) {
+      post.images = [...(post.images || []), ...uploadedImages];
+    } else if (updates.images !== undefined) {
+      post.images = updates.images;
+    }
 
     await post.save();
     await post.populate('author relatedPet', 'name avatar organizationDetails breed category images');

@@ -1259,7 +1259,7 @@ const CreatePostModal = ({ groupId, onClose, onSuccess, editPost = null, focusIm
                     </div>
                   ) : (
                     <div className="flex items-center space-x-2">
-                      <span>{editPost ? '✏️ Update Post' : '🚀 Share Post'}</span>
+                      <span>{editPost ? 'Update Post' : 'Share Post'}</span>
                     </div>
                   )}
                 </Button>
