@@ -423,8 +423,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 ## 📞 Support
-
-- 📧 **Email**: prakash.varun.0305@gmail.com
 - 🐛 **Bug Reports**: [GitHub Issues](https://github.com/RaoVrn/FurEverHome/issues)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/RaoVrn/FurEverHome/discussions)
 - 📚 **Documentation**: [Wiki](https://github.com/RaoVrn/FurEverHome/wiki)
