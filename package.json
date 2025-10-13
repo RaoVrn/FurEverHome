@@ -1,0 +1,12 @@
+{
+  "name": "fureverhome",
+  "private": true,
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && npm run dev",
+    "client": "cd client && npm start"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}

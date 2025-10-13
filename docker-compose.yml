@@ -17,6 +17,11 @@ services:
       - ./backend/scripts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
     networks:
       - fureverhome-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # Backend API
   backend:
@@ -42,12 +47,48 @@ services:
     networks:
       - fureverhome-network
     command: npm run dev
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
 
   # Frontend React App
   frontend:
     build:
       context: ./client
       dockerfile: Dockerfile
+    container_name: fureverhome-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - fureverhome-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# Define networks
+networks:
+  fureverhome-network:
+    driver: bridge
+
+# Define volumes
+volumes:
+  mongodb_data:
+    driver: local
+  uploads_data:
+    driver: local
     container_name: fureverhome-frontend
     restart: unless-stopped
     environment:
